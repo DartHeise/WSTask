@@ -5,10 +5,15 @@ import java.util.List;
 
 @Builder
 public class Employee implements Comparable<Employee> {
+    @Getter
     private String firstName;
+    @Getter
     private String lastName;
+    @Getter
     private String description;
+    @Getter
     private List<String> characteristics;
+    @Getter
     private Post post;
 
     public String getName(){
@@ -22,7 +27,7 @@ public class Employee implements Comparable<Employee> {
                 + "About me: %s\n"
                 + "Characteristics: %s\n"
                 + "Post: %s\n",
-                getName(), description, String.join(", ", characteristics), post.getPostName());
+                getName(), description, String.join(", ", characteristics), post.getName());
         return f.toString();
     }
 

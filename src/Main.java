@@ -5,6 +5,12 @@ import java.util.regex.Pattern;
 
 public class Main {
     private static final Map<UUID, Post> posts = new HashMap<>();
+    private static final Pattern pattern = Pattern.compile(
+            "firstName: (?<firstName>.+)" +
+                    "lastName: (?<lastName>.+)" +
+                    "description: (?<description>.+|)" +
+                    "characteristics: (?<characteristics>.+)" +
+                    "postId: (?<postId>.+)");
 
     public static void main(String[] args) throws Exception {
         createPost(UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"), "Backend");
@@ -42,12 +48,6 @@ public class Main {
     }
 
     private static Employee parse(String employee){
-        Pattern pattern = Pattern.compile(
-                "firstName: (?<firstName>.+)" + // Именованная группа с именем
-                "lastName: (?<lastName>.+)" + // Именованная группа с фамилией
-                "description: (?<description>.+|)" + // Именованная группа с описанием работника
-                "characteristics: (?<characteristics>.+)" + // Именованная группа с характеристиками
-                "postId: (?<postId>.+)"); // Именованная группа с кодом должности
         Matcher m =pattern.matcher(employee);
         m.find();
         return Employee // Создаем и возвращаем карточку работника
