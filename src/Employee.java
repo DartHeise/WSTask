@@ -1,4 +1,5 @@
 import lombok.Builder;
+import lombok.Getter;
 
 import java.util.Formatter;
 import java.util.List;
@@ -33,6 +34,6 @@ public class Employee implements Comparable<Employee> {
 
     @Override
     public int compareTo(Employee o) {
-        return getName().compareTo(o.getName()); // Сравнение по имени и фамилии
+        return getName().compareTo(o.getName());
     }
 }

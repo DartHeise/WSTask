@@ -1,13 +1,13 @@
+import lombok.Getter;
+
 import java.util.UUID;
 
 public class Post {
     private final UUID id;
+    @Getter
     private final String name;
-    public Post(UUID id, String postName){
+    public Post(UUID id, String name){
         this.id = id;
-        this.name = postName;
-    }
-    public String getName(){
-        return name;
+        this.name = name;
     }
 }
