@@ -1,0 +1,16 @@
+[
+  {
+    "firstName": "Artem",
+    "lastName": "Kornev",
+    "description": "Duis elit ligula, ullamcorper at libero ac, auctor condimentum \nnisi. Ut ornare eros non pellentesque congue. Interdum et malesuada fames \nac ante ipsum primis in faucibus. Ut pharetra suscipit ligula in vulputate. \nProin quis ipsum et elit tristique auctor vitae id quam. Donec aliquet \nlibero maximus aliquet pretium",
+    "characteristics": ["shy", "tactful", "resourceful", "reliable"],
+    "postId": "606b99c0-b621-4f50-b0b6-58ed19ce6be1"
+  },
+  {
+    "firstName": "Pavel",
+    "lastName": "Ivanov",
+    "description": "Curabitur at luctus quam, non imperdiet nulla. Vivamus finibus \nvitae tellus in sodales. Nulla varius purus lorem, nec finibus odio \nfinibus non. Proin nec diam posuere, sodales velit eu, laoreet felis. \nSed nec tellus pellentesque, varius nisl sed, ullamcorper velit",
+    "characteristics": ["unpredictable", "self-confident", "energetic", "honest"],
+    "postId": "606b99c0-b621-4f50-b0b6-58ed19ce6be1"
+  }
+]
