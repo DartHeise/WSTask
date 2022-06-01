@@ -3,6 +3,7 @@ package model;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Formatter;
 import java.util.List;
 
@@ -13,18 +14,18 @@ import java.util.List;
 public class Employee{
 
     @NotBlank(message = "Необходимо указать имя")
-    private final String firstName;
+    private String firstName;
 
     @NotBlank(message = "Необходимо указать фамилию")
-    private final String lastName;
+    private String lastName;
 
-    private final String description;
+    private String description;
 
     @NotBlank(message = "Необходимо указать характеристику")
-    private final List<String> characteristics;
+    private List<String> characteristics;
 
-    @NotBlank(message = "Необходимо указать должность")
-    private final Post post;
+    @NotNull(message = "Необходимо указать должность")
+    private Post post;
 
     public String getName(){
         return lastName + " " + firstName;

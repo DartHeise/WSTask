@@ -1,20 +1,27 @@
 package model;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.*;
 
 import java.util.List;
-@Setter
+@Builder
 @Getter
+@JsonDeserialize(builder = CreateEmployeeArgument.CreateEmployeeArgumentBuilder.class)
 public class CreateEmployeeArgument {
 
-    private String firstName;
+    @JsonProperty(value = "firstName")
+    private final String firstName;
 
-    private String lastName;
+    @JsonProperty(value = "lastName")
+    private final String lastName;
 
-    private String description;
+    @JsonProperty(value = "description")
+    private final String description;
 
-    private List<String> characteristics;
+    @JsonProperty(value = "characteristics")
+    private final List<String> characteristics;
 
-    private String postId;
+    @JsonProperty(value = "postId")
+    private final String postId;
 }

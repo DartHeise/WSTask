@@ -1,64 +1,59 @@
 package serviceTest;
 
-import action.AddEmployeesAction;
 import model.Employee;
+import model.Post;
+import model.SearchingParameters;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import resources.GetEmployeesFileAction;
+import service.ConsoleArgsService;
 import service.EmployeeService;
-import service.FileService;
-import service.PostService;
+import utils.GetEmployeesFileAction;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class EmployeeServiceTest {
 
-    private final String pathName = "C:\\Users\\Иван\\IdeaProjects\\WSTask_Maven\\src\\test\\java\\resources\\Employees.json";
-
-    private String[] args;
+    private final List<Employee> employees = List.of(
+            Employee.builder()
+                    .firstName("Denis")
+                    .lastName("Losev")
+                    .description("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit \namet dictum felis, eu fringilla eros. Sed et gravida neque. Nullam at egestas \nerat. Mauris vitae convallis nulla. Aenean condimentum lectus magna. \nSuspendisse viverra quam non ante pellentesque, a euismod nunc dapibus. Duis \nsed congue erat")
+                    .characteristics(List.of("honest", "introvert", "like criticism", "love of learning", "pragmatism"))
+                    .post(new Post(UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"), "Backend"))
+                    .build(),
+            Employee.builder()
+                    .firstName("Ivan")
+                    .lastName("Ivanov")
+                    .description("")
+                    .characteristics(List.of("active", "cynical", "hard-working", "enthusiastic"))
+                    .post(new Post(UUID.fromString("762d15a5-3bc9-43ef-ae96-02a680a557d0"), "Frontend"))
+                    .build());
 
     private EmployeeService employeeService;
 
-    public void SetUp(String consoleArgument) throws Exception {
+    private ConsoleArgsService consoleArgsService;
+
+    @BeforeEach
+    public void setUp(){
         employeeService = new EmployeeService();
-        args = consoleArgument.split(" ");
-        AddEmployeesAction addEmployeesAction = new AddEmployeesAction(employeeService,
-                new FileService(),
-                new PostService());
-        addEmployeesAction.addEmployeesFromFile(pathName);
+        consoleArgsService = mock(ConsoleArgsService.class);
+        employeeService.addEmployees(employees);
     }
 
     @Test
-        public void getAllOrderedWithoutSearchingString() throws Exception {
+    public void getAllOrderedWithoutSearchingString() throws Exception {
         // Arrange
-        SetUp(pathName);
-        List<Employee> expected;
-        List<Employee> actual;
+        List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
+                ("src\\test\\java\\resources\\jsons\\SortedEmployees.json");
+        when(consoleArgsService.getSearchingParameters())
+                .thenReturn(new SearchingParameters());
         // Act
-        expected = GetEmployeesFileAction.getEmployeesFile(pathName).stream()
-                .sorted(Comparator.comparing(Employee::getLastName)
-                        .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-        actual = employeeService.getAllOrdered(args);
-        // Assert
-        Assertions.assertEquals(expected, actual);
-    }
-
-    @Test
-    public void getAllOrderedWithNameOnly() throws Exception {
-        // Arrange
-        SetUp(String.format("%s Ivanov_Ivan/", pathName));
-        List<Employee> expected;
-        List<Employee> actual;
-        // Act
-        expected = GetEmployeesFileAction.getEmployeesFile
-                ("C:\\Users\\Иван\\IdeaProjects\\WSTask_Maven\\src\\test\\java\\resources\\EmployeesWithNameIvanovIvan.json").stream()
-                .sorted(Comparator.comparing(Employee::getLastName)
-                        .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-        actual = employeeService.getAllOrdered(args);
+        List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -66,33 +61,12 @@ public class EmployeeServiceTest {
     @Test
     public void getAllOrderedWithIdOnly() throws Exception {
         // Arrange
-        SetUp(String.format("%s _/606b99c0-b621-4f50-b0b6-58ed19ce6be1", pathName));
-        List<Employee> expected;
-        List<Employee> actual;
+        List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
+                ("src\\test\\java\\resources\\jsons\\EmployeesWithFullstackId.json");
+        when(consoleArgsService.getSearchingParameters())
+                .thenReturn(new SearchingParameters(null, "762d15a5-3bc9-43ef-ae96-02a680a557d0"));
         // Act
-        expected = GetEmployeesFileAction.getEmployeesFile
-                ("C:\\Users\\Иван\\IdeaProjects\\WSTask_Maven\\src\\test\\java\\resources\\EmployeesWithFullstackId.json").stream()
-                .sorted(Comparator.comparing(Employee::getLastName)
-                        .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-        actual = employeeService.getAllOrdered(args);
-        // Assert
-        Assertions.assertEquals(expected, actual);
-    }
-
-    @Test
-    public void getAllOrderedWithNameAndId() throws Exception {
-        // Arrange
-        SetUp(String.format("%s Ivanov_Ivan/762d15a5-3bc9-43ef-ae96-02a680a557d0", pathName));
-        List<Employee> expected;
-        List<Employee> actual;
-        // Act
-        expected = GetEmployeesFileAction.getEmployeesFile
-                ("C:\\Users\\Иван\\IdeaProjects\\WSTask_Maven\\src\\test\\java\\resources\\EmployeesWithNameIvanovIvanAndIdFrontend.json").stream()
-                .sorted(Comparator.comparing(Employee::getLastName)
-                        .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-        actual = employeeService.getAllOrdered(args);
+        List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -100,16 +74,12 @@ public class EmployeeServiceTest {
     @Test
     public void getAllOrderedWithFirstNameOnly() throws Exception {
         // Arrange
-        SetUp(String.format("%s _Ivan/", pathName));
-        List<Employee> expected;
-        List<Employee> actual;
+        List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
+                ("src\\test\\java\\resources\\jsons\\EmployeesWithFirstNameIvan.json");;
+        when(consoleArgsService.getSearchingParameters())
+                .thenReturn(new SearchingParameters("Ivan", null));
         // Act
-        expected = GetEmployeesFileAction.getEmployeesFile
-                        ("C:\\Users\\Иван\\IdeaProjects\\WSTask_Maven\\src\\test\\java\\resources\\EmployeesWithFirstNameIvan.json").stream()
-                .sorted(Comparator.comparing(Employee::getLastName)
-                        .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-        actual = employeeService.getAllOrdered(args);
+        List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -117,16 +87,12 @@ public class EmployeeServiceTest {
     @Test
     public void getAllOrderedWithLastNameOnly() throws Exception {
         // Arrange
-        SetUp(String.format("%s Ivanov_/", pathName));
-        List<Employee> expected;
-        List<Employee> actual;
+        List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
+                ("src\\test\\java\\resources\\jsons\\EmployeesWithLastNameIvanov.json");;
+        when(consoleArgsService.getSearchingParameters())
+                .thenReturn(new SearchingParameters("Ivanov", null));
         // Act
-        expected = GetEmployeesFileAction.getEmployeesFile
-                        ("C:\\Users\\Иван\\IdeaProjects\\WSTask_Maven\\src\\test\\java\\resources\\EmployeesWithLastNameIvanov.json").stream()
-                .sorted(Comparator.comparing(Employee::getLastName)
-                        .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-        actual = employeeService.getAllOrdered(args);
+        List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -134,16 +100,12 @@ public class EmployeeServiceTest {
     @Test
     public void getAllOrderedWithLastNameAndId() throws Exception {
         // Arrange
-        SetUp(String.format("%s Ivanov_/762d15a5-3bc9-43ef-ae96-02a680a557d0", pathName));
-        List<Employee> expected;
-        List<Employee> actual;
+        List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
+                ("src\\test\\java\\resources\\jsons\\EmployeesWithLastNameIvanovAndFrontendId.json");;
+        when(consoleArgsService.getSearchingParameters())
+                .thenReturn(new SearchingParameters("Ivanov", "762d15a5-3bc9-43ef-ae96-02a680a557d0"));
         // Act
-        expected = GetEmployeesFileAction.getEmployeesFile
-                        ("C:\\Users\\Иван\\IdeaProjects\\WSTask_Maven\\src\\test\\java\\resources\\EmployeesWithLastNameIvanovAndFrontendId.json").stream()
-                .sorted(Comparator.comparing(Employee::getLastName)
-                        .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-        actual = employeeService.getAllOrdered(args);
+        List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -151,39 +113,13 @@ public class EmployeeServiceTest {
     @Test
     public void getAllOrderedWithFirstNameAndId() throws Exception {
         // Arrange
-        SetUp(String.format("%s _Ivan/762d15a5-3bc9-43ef-ae96-02a680a557d0", pathName));
-        List<Employee> expected;
-        List<Employee> actual;
+        List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
+                ("src\\test\\java\\resources\\jsons\\EmployeesWithFirstNameIvanAndFrontendId.json");;
+        when(consoleArgsService.getSearchingParameters())
+                .thenReturn(new SearchingParameters("Ivan", "762d15a5-3bc9-43ef-ae96-02a680a557d0"));
         // Act
-        expected = GetEmployeesFileAction.getEmployeesFile
-                        ("C:\\Users\\Иван\\IdeaProjects\\WSTask_Maven\\src\\test\\java\\resources\\EmployeesWithFirstNameIvanAndFrontendId.json").stream()
-                .sorted(Comparator.comparing(Employee::getLastName)
-                        .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-        actual = employeeService.getAllOrdered(args);
+        List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
         // Assert
         Assertions.assertEquals(expected, actual);
-    }
-
-    @Test
-    public void getAllOrderedWithoutSearchingArguments() throws Exception {
-        // Arrange
-        SetUp(String.format("%s _/", pathName));
-        Exception exception;
-        String expectedMessage = "Every searching string argument is blank!";
-        // Assert
-        exception = Assertions.assertThrows(Exception.class, () -> employeeService.getAllOrdered(args));
-        Assertions.assertTrue(exception.getMessage().contains(expectedMessage));
-    }
-
-    @Test
-    public void getAllOrderedWithIncorrectSearchingString() throws Exception {
-        // Arrange
-        SetUp(String.format("%s someString", pathName));
-        Exception exception;
-        String expectedMessage = "Incorrect searching string format. Use {lastName}_{firstName}/{postId} instead";
-        // Assert
-        exception = Assertions.assertThrows(Exception.class, () -> employeeService.getAllOrdered(args));
-        Assertions.assertTrue(exception.getMessage().contains(expectedMessage));
     }
 }

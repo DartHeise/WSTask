@@ -1,0 +1,16 @@
+[
+  {
+    "firstName": "Ivan",
+    "lastName": "Ivanov",
+    "description": "",
+    "characteristics": ["active", "cynical", "hard-working", "enthusiastic"],
+    "postId": "762d15a5-3bc9-43ef-ae96-02a680a557d0"
+  },
+  {
+    "firstName": "Denis",
+    "lastName": "Losev",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit \namet dictum felis, eu fringilla eros. Sed et gravida neque. Nullam at egestas \nerat. Mauris vitae convallis nulla. Aenean condimentum lectus magna. \nSuspendisse viverra quam non ante pellentesque, a euismod nunc dapibus. Duis \nsed congue erat",
+    "characteristics": ["honest", "introvert", "like criticism", "love of learning", "pragmatism"],
+    "postId": "854ef89d-6c27-4635-926d-894d76a81707"
+  }
+]

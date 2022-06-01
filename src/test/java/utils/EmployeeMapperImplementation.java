@@ -1,10 +1,11 @@
-package mapper;
+package utils;
 
+import mapper.EmployeeMapper;
 import model.CreateEmployeeArgument;
-import model.Employee;
 import model.Post;
+import model.Employee;
 
-public class EmployeeMapperImp implements EmployeeMapper {
+public class EmployeeMapperImplementation implements EmployeeMapper {
 
     @Override
     public Employee toEmployee(CreateEmployeeArgument argument, Post post) {

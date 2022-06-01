@@ -1,7 +1,8 @@
 package action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import mapper.EmployeeMapperImp;
+import lombok.RequiredArgsConstructor;
+import mapper.EmployeeMapper;
 import model.CreateEmployeeArgument;
 import model.Employee;
 import service.EmployeeService;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class AddEmployeesAction {
 
     private final EmployeeService employeeService;
@@ -20,21 +22,16 @@ public class AddEmployeesAction {
 
     private final PostService postService;
 
-    public AddEmployeesAction(EmployeeService employeeService, FileService fileService, PostService postService){
-        this.employeeService = employeeService;
-        this.fileService = fileService;
-        this.postService = postService;
-    }
+    private final EmployeeMapper employeeMapper;
 
     public void addEmployeesFromFile(String pathName) throws Exception {
         fileService.addPathName(pathName);
 
-        CreateEmployeeArgument[] createEmployeeArguments = new ObjectMapper().readValue(fileService.getFile(), CreateEmployeeArgument[].class);
+        CreateEmployeeArgument[] employeeArguments = new ObjectMapper().readValue(fileService.getFile(), CreateEmployeeArgument[].class);
         List<Employee> employees = new ArrayList<>();
 
-        EmployeeMapperImp employeeMapperImp = new EmployeeMapperImp();
-        for (CreateEmployeeArgument employeeArgument : createEmployeeArguments) {
-            employees.add(employeeMapperImp.toEmployee(employeeArgument, postService.getPostByUUID(UUID.fromString(employeeArgument.getPostId()))));
+        for (CreateEmployeeArgument employeeArgument : employeeArguments) {
+            employees.add(employeeMapper.toEmployee(employeeArgument, postService.getPostByUUID(UUID.fromString(employeeArgument.getPostId()))));
         }
 
         employeeService.addEmployees(employees);

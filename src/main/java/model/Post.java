@@ -3,17 +3,18 @@ package model;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode
 public class Post {
 
-    @NotBlank(message = "Необходимо указать идентификатор должности")
-    private final UUID id;
+    @NotNull(message = "Необходимо указать идентификатор должности")
+    private UUID id;
 
     @NotBlank(message = "Необходимо указать название должности")
-    private final String name;
+    private String name;
 }

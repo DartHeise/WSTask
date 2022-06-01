@@ -1,13 +1,11 @@
 package service;
 
-import lombok.Getter;
 import model.Post;
 
 import java.util.*;
 
 public class PostService {
 
-    @Getter
     private final Map<UUID, Post> posts = new HashMap<>();
 
     public PostService() {
