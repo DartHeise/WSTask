@@ -44,7 +44,7 @@ public class AddEmployeeActionTest {
         PostService postService = mock(PostService.class);
         FileService fileService = mock(FileService.class);
         EmployeeService employeeService = mock(EmployeeService.class);
-        EmployeeMapper employeeMapper = mock(EmployeeMapperImpl.class);
+        EmployeeMapper employeeMapper = mock(EmployeeMapper.class);
         AddEmployeesAction addEmployeesAction = new AddEmployeesAction(employeeService,
                                                                        fileService,
                                                                        postService,
