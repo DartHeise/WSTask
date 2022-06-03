@@ -25,9 +25,7 @@ public class AddEmployeesAction {
     private final EmployeeMapper employeeMapper;
 
     public void addEmployeesFromFile(String pathName) throws Exception {
-        fileService.addPathName(pathName);
-
-        CreateEmployeeArgument[] employeeArguments = new ObjectMapper().readValue(fileService.getFile(), CreateEmployeeArgument[].class);
+        CreateEmployeeArgument[] employeeArguments = new ObjectMapper().readValue(fileService.getFile(pathName), CreateEmployeeArgument[].class);
         List<Employee> employees = new ArrayList<>();
 
         for (CreateEmployeeArgument employeeArgument : employeeArguments) {

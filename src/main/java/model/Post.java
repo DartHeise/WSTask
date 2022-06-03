@@ -6,10 +6,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
-@Getter
-@Setter
 @AllArgsConstructor
-@EqualsAndHashCode
+@NoArgsConstructor
+@Data
 public class Post {
 
     @NotNull(message = "Необходимо указать идентификатор должности")

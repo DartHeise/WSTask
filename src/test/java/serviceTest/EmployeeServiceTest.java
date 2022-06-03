@@ -52,8 +52,10 @@ public class EmployeeServiceTest {
                 ("src\\test\\java\\resources\\jsons\\SortedEmployees.json");
         when(consoleArgsService.getSearchingParameters())
                 .thenReturn(new SearchingParameters());
+
         // Act
         List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
+
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -64,9 +66,11 @@ public class EmployeeServiceTest {
         List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
                 ("src\\test\\java\\resources\\jsons\\EmployeesWithFullstackId.json");
         when(consoleArgsService.getSearchingParameters())
-                .thenReturn(new SearchingParameters(null, "762d15a5-3bc9-43ef-ae96-02a680a557d0"));
+                .thenReturn(new SearchingParameters(null, UUID.fromString("762d15a5-3bc9-43ef-ae96-02a680a557d0")));
+
         // Act
         List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
+
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -78,8 +82,10 @@ public class EmployeeServiceTest {
                 ("src\\test\\java\\resources\\jsons\\EmployeesWithFirstNameIvan.json");;
         when(consoleArgsService.getSearchingParameters())
                 .thenReturn(new SearchingParameters("Ivan", null));
+
         // Act
         List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
+
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -91,8 +97,10 @@ public class EmployeeServiceTest {
                 ("src\\test\\java\\resources\\jsons\\EmployeesWithLastNameIvanov.json");;
         when(consoleArgsService.getSearchingParameters())
                 .thenReturn(new SearchingParameters("Ivanov", null));
+
         // Act
         List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
+
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -103,9 +111,11 @@ public class EmployeeServiceTest {
         List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
                 ("src\\test\\java\\resources\\jsons\\EmployeesWithLastNameIvanovAndFrontendId.json");;
         when(consoleArgsService.getSearchingParameters())
-                .thenReturn(new SearchingParameters("Ivanov", "762d15a5-3bc9-43ef-ae96-02a680a557d0"));
+                .thenReturn(new SearchingParameters("Ivanov", UUID.fromString("762d15a5-3bc9-43ef-ae96-02a680a557d0")));
+
         // Act
         List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
+
         // Assert
         Assertions.assertEquals(expected, actual);
     }
@@ -116,9 +126,11 @@ public class EmployeeServiceTest {
         List<Employee> expected = GetEmployeesFileAction.getEmployeesFile
                 ("src\\test\\java\\resources\\jsons\\EmployeesWithFirstNameIvanAndFrontendId.json");;
         when(consoleArgsService.getSearchingParameters())
-                .thenReturn(new SearchingParameters("Ivan", "762d15a5-3bc9-43ef-ae96-02a680a557d0"));
+                .thenReturn(new SearchingParameters("Ivan", UUID.fromString("762d15a5-3bc9-43ef-ae96-02a680a557d0")));
+
         // Act
         List<Employee> actual = employeeService.getAllOrdered(consoleArgsService.getSearchingParameters());
+
         // Assert
         Assertions.assertEquals(expected, actual);
     }

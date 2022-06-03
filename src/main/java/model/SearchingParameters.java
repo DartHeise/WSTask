@@ -2,14 +2,14 @@ package model;
 
 import lombok.*;
 
-@Setter
-@Getter
+import java.util.UUID;
+
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@Data
 public class SearchingParameters {
 
     private String name;
 
-    private String postId;
+    private UUID postId;
 }

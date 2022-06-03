@@ -1,15 +1,16 @@
 package model;
 
 import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Formatter;
 import java.util.List;
 
-@Getter
-@Setter
-@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 @Builder
 public class Employee{
 

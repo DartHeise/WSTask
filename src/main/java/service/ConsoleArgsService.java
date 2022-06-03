@@ -3,7 +3,9 @@ package service;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import model.SearchingParameters;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +31,8 @@ public class ConsoleArgsService {
         if(!matcher.find())
             throw new Exception("Incorrect searching string format. Use {firstName/lastName}/{postId} instead");
 
-        return new SearchingParameters(matcher.group("name"), matcher.group("postId"));
+        UUID id = (!StringUtils.isBlank(matcher.group("postId"))) ? UUID.fromString(matcher.group("postId")) : null;
+
+        return new SearchingParameters(matcher.group("name"), id);
     }
 }

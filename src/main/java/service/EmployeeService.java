@@ -24,11 +24,11 @@ public class EmployeeService {
         Stream<Employee> stream = employees.stream();
 
         if (!StringUtils.isBlank(searchParams.getName())) {
-            stream = stream.filter(x -> x.getLastName().equalsIgnoreCase(searchParams.getName())
-                                || x.getFirstName().equalsIgnoreCase(searchParams.getName()));
+            stream = stream.filter(x -> StringUtils.containsIgnoreCase(x.getLastName(), searchParams.getName())
+                                || StringUtils.containsIgnoreCase(x.getFirstName(), searchParams.getName()));
         }
-        if (!StringUtils.isBlank(searchParams.getPostId())) {
-            stream = stream.filter(x -> x.getPost().getId().equals(UUID.fromString(searchParams.getPostId())));
+        if (searchParams.getPostId() != null) {
+            stream = stream.filter(x -> x.getPost().getId().equals(searchParams.getPostId()));
         }
 
         return stream.sorted(Comparator.comparing(Employee::getLastName)
