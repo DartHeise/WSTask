@@ -1,20 +1,31 @@
-import lombok.Builder;
-import lombok.Getter;
+package model;
 
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Formatter;
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 @Builder
-public class Employee implements Comparable<Employee> {
-    @Getter
+public class Employee{
+
+    @NotBlank(message = "Необходимо указать имя")
     private String firstName;
-    @Getter
+
+    @NotBlank(message = "Необходимо указать фамилию")
     private String lastName;
-    @Getter
+
     private String description;
-    @Getter
+
+    @NotBlank(message = "Необходимо указать характеристику")
     private List<String> characteristics;
-    @Getter
+
+    @NotNull(message = "Необходимо указать должность")
     private Post post;
 
     public String getName(){
@@ -22,7 +33,7 @@ public class Employee implements Comparable<Employee> {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         Formatter f = new Formatter();
         f.format("Name: %s\n"
                 + "About me: %s\n"
@@ -30,10 +41,5 @@ public class Employee implements Comparable<Employee> {
                 + "Post: %s\n",
                 getName(), description, String.join(", ", characteristics), post.getName());
         return f.toString();
-    }
-
-    @Override
-    public int compareTo(Employee o) {
-        return getName().compareTo(o.getName());
     }
 }
