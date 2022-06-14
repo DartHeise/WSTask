@@ -15,6 +15,12 @@ public class PostService {
 
     private final PostMapper postMapper = new PostMapperImpl();
 
+    public PostService() {
+        posts.put(UUID.fromString("606b99c0-b621-4f50-b0b6-58ed19ce6be1"),
+                  new Post(UUID.fromString("606b99c0-b621-4f50-b0b6-58ed19ce6be1"),
+                                     "Frontend"));
+    }
+
     public Post get(UUID id) {
         throwNotFoundExceptionIfNotExists(id);
 

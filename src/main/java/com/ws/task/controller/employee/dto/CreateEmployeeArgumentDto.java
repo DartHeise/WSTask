@@ -16,9 +16,6 @@ import java.util.UUID;
 @Data
 public class CreateEmployeeArgumentDto {
 
-    @NotNull(message = "Необходимо указать идентификатор работника")
-    private final UUID id;
-
     @NotBlank(message = "Необходимо указать имя")
     private final String firstName;
 

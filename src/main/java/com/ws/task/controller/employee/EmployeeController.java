@@ -1,5 +1,7 @@
 package com.ws.task.controller.employee;
 
+import com.ws.task.action.CreateEmployeeArgumentAction;
+import com.ws.task.controller.employee.dto.CreateEmployeeArgumentDto;
 import com.ws.task.controller.employee.dto.EmployeeDto;
 import com.ws.task.mapper.dto.EmployeeDtoMapper;
 import com.ws.task.model.employee.Employee;
@@ -23,6 +25,8 @@ public class EmployeeController {
 
     private final EmployeeDtoMapper employeeDtoMapper;
 
+    private final CreateEmployeeArgumentAction createEmployeeArgAction;
+
     @GetMapping("/get/{id}")
     @ApiOperation("Получить работника по идентификатору")
     public EmployeeDto getEmployee(@PathVariable UUID id) {
@@ -42,7 +46,8 @@ public class EmployeeController {
 
     @PostMapping("/create")
     @ApiOperation("Добавить работника")
-    public EmployeeDto createEmployee(@RequestBody @Valid CreateEmployeeArgument createEmployeeArg) {
+    public EmployeeDto createEmployee(@RequestBody @Valid CreateEmployeeArgumentDto createEmployeeArgDto) {
+        CreateEmployeeArgument createEmployeeArg = createEmployeeArgAction.execute(createEmployeeArgDto);
         Employee createdEmployee = employeeService.create(createEmployeeArg);
         return employeeDtoMapper.toEmployeeDto(createdEmployee);
     }
