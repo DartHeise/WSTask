@@ -4,6 +4,8 @@ import com.ws.task.exception.NotFoundException;
 import com.ws.task.mapper.model.EmployeeMapper;
 import com.ws.task.mapper.model.EmployeeMapperImpl;
 import com.ws.task.model.employee.Employee;
+import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
+import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -47,18 +49,16 @@ public class EmployeeService {
         return employee;
     }
 
-    public Employee update(CreateEmployeeArgument createEmployeeArg, UUID id) {
+    public Employee update(UpdateEmployeeArgument updateEmployeeArg, UUID id) {
         throwNotFoundExceptionIfNotExists(id);
 
-        Employee employee = employeeMapper.toEmployee(createEmployeeArg, id);
+        Employee employee = employeeMapper.toEmployee(updateEmployeeArg, id);
         employees.replace(employee.getId(), employee);
 
         return employee;
     }
 
     public void delete(UUID id) {
-        throwNotFoundExceptionIfNotExists(id);
-
         employees.remove(id);
     }
 

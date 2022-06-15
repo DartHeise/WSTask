@@ -1,7 +1,7 @@
 package com.ws.task.action;
 
 import com.ws.task.controller.employee.dto.CreateEmployeeArgumentDto;
-import com.ws.task.service.employeeService.CreateEmployeeArgument;
+import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
 import com.ws.task.service.postService.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

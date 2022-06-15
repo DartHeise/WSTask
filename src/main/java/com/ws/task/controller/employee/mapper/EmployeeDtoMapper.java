@@ -1,4 +1,4 @@
-package com.ws.task.mapper.dto;
+package com.ws.task.controller.employee.mapper;
 
 import com.ws.task.controller.employee.dto.EmployeeDto;
 import com.ws.task.model.employee.Employee;

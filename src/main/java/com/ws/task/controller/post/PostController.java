@@ -2,11 +2,14 @@ package com.ws.task.controller.post;
 
 import com.ws.task.controller.post.dto.CreatePostArgumentDto;
 import com.ws.task.controller.post.dto.PostDto;
-import com.ws.task.mapper.argumentDto.CreatePostArgumentMapper;
-import com.ws.task.mapper.dto.PostDtoMapper;
+import com.ws.task.controller.post.dto.UpdatePostArgumentDto;
+import com.ws.task.controller.post.mapper.CreatePostArgumentMapper;
+import com.ws.task.controller.post.mapper.UpdatePostArgumentMapper;
+import com.ws.task.controller.post.mapper.PostDtoMapper;
 import com.ws.task.model.Post;
-import com.ws.task.service.postService.CreatePostArgument;
+import com.ws.task.service.postService.arguments.CreatePostArgument;
 import com.ws.task.service.postService.PostService;
+import com.ws.task.service.postService.arguments.UpdatePostArgument;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +28,8 @@ public class PostController {
     private final PostDtoMapper postDtoMapper;
 
     private final CreatePostArgumentMapper createPostArgMapper;
+
+    private final UpdatePostArgumentMapper updatePostArgMapper;
 
     @GetMapping("/get/{id}")
     @ApiOperation("Получить должность по идентификатору")
@@ -52,9 +57,9 @@ public class PostController {
 
     @PutMapping("/update/{id}")
     @ApiOperation("Обновить должность")
-    public PostDto updatePost(@PathVariable UUID id, @RequestBody @Valid CreatePostArgumentDto createPostArgDto) {
-        CreatePostArgument createPostArg = createPostArgMapper.toCreatePostArgument(createPostArgDto);
-        Post updatedPost = postService.update(createPostArg, id);
+    public PostDto updatePost(@PathVariable UUID id, @RequestBody @Valid UpdatePostArgumentDto updatePostArgDto) {
+        UpdatePostArgument updatePostArg = updatePostArgMapper.toUpdatePostArgument(updatePostArgDto);
+        Post updatedPost = postService.update(updatePostArg, id);
         return postDtoMapper.toPostDto(updatedPost);
     }
 

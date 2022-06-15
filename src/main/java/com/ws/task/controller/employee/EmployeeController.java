@@ -1,13 +1,16 @@
 package com.ws.task.controller.employee;
 
 import com.ws.task.action.CreateEmployeeArgumentAction;
+import com.ws.task.action.UpdateEmployeeArgumentAction;
 import com.ws.task.controller.employee.dto.CreateEmployeeArgumentDto;
 import com.ws.task.controller.employee.dto.EmployeeDto;
-import com.ws.task.mapper.dto.EmployeeDtoMapper;
+import com.ws.task.controller.employee.dto.UpdateEmployeeArgumentDto;
+import com.ws.task.controller.employee.mapper.EmployeeDtoMapper;
 import com.ws.task.model.employee.Employee;
-import com.ws.task.service.employeeService.CreateEmployeeArgument;
+import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
+import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,8 @@ public class EmployeeController {
     private final EmployeeDtoMapper employeeDtoMapper;
 
     private final CreateEmployeeArgumentAction createEmployeeArgAction;
+
+    private final UpdateEmployeeArgumentAction updateEmployeeArgAction;
 
     @GetMapping("/get/{id}")
     @ApiOperation("Получить работника по идентификатору")
@@ -54,8 +59,9 @@ public class EmployeeController {
 
     @PutMapping("/update/{id}")
     @ApiOperation("Обновить работника")
-    public EmployeeDto updateEmployee(@PathVariable UUID id, @RequestBody @Valid CreateEmployeeArgument createEmployeeArg) {
-        Employee updatedEmployee = employeeService.update(createEmployeeArg, id);
+    public EmployeeDto updateEmployee(@PathVariable UUID id, @RequestBody @Valid UpdateEmployeeArgumentDto updateEmployeeArgDto) {
+        UpdateEmployeeArgument updateEmployeeArg = updateEmployeeArgAction.execute(updateEmployeeArgDto);
+        Employee updatedEmployee = employeeService.update(updateEmployeeArg, id);
         return employeeDtoMapper.toEmployeeDto(updatedEmployee);
     }
 

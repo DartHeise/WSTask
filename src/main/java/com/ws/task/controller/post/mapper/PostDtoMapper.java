@@ -1,4 +1,4 @@
-package com.ws.task.mapper.dto;
+package com.ws.task.controller.post.mapper;
 
 import com.ws.task.controller.post.dto.PostDto;
 import com.ws.task.model.Post;

@@ -3,15 +3,16 @@ package com.ws.task.controllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ws.task.controller.employee.dto.CreateEmployeeArgumentDto;
 import com.ws.task.controller.employee.dto.EmployeeDto;
+import com.ws.task.controller.employee.dto.UpdateEmployeeArgumentDto;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.Post;
 import com.ws.task.model.employee.Contacts;
 import com.ws.task.model.employee.Employee;
 import com.ws.task.model.employee.JobType;
-import com.ws.task.service.employeeService.CreateEmployeeArgument;
+import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
-import com.ws.task.service.postService.CreatePostArgument;
+import com.ws.task.service.postService.arguments.CreatePostArgument;
 import com.ws.task.service.postService.PostService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,12 +54,16 @@ public class EmployeeControllerIT {
 
     @Test
     void get() {
+        // Arrange
         Employee employee = employees.get(0);
 
+        // Act
         List<EmployeeDto> response = webTestClient.get()
                                                   .uri(uriBuilder -> uriBuilder.path("employee/get/" + employee.getId().toString())
                                                                                .build())
                                                   .exchange()
+
+                                                  // Assert
                                                   .expectStatus()
                                                   .isOk()
                                                   .expectBodyList(EmployeeDto.class)
@@ -74,13 +79,17 @@ public class EmployeeControllerIT {
 
     @Test
     void getAll() {
+        // Arrange
         SearchingParameters searchParams = new SearchingParameters();
 
+        // Act
         List<EmployeeDto> response = webTestClient.post()
                                                   .uri(uriBuilder -> uriBuilder.path("employee/getAll")
                                                                                .build())
                                                   .bodyValue(searchParams)
                                                   .exchange()
+
+                                                  // Assert
                                                   .expectStatus()
                                                   .isOk()
                                                   .expectBodyList(EmployeeDto.class)
@@ -98,30 +107,33 @@ public class EmployeeControllerIT {
 
     @Test
     void post() {
+        // Arrange
         Post post = postService.create(CreatePostArgument.builder()
                                                          .name("Frontend")
                                                          .build());
+        CreateEmployeeArgumentDto createEmployeeArgDto = CreateEmployeeArgumentDto.builder()
+                                                                                  .firstName("Artem")
+                                                                                  .lastName("Kornev")
+                                                                                  .description("")
+                                                                                  .characteristics(List.of
+                                                                                        ("shy", "tactful", "resourceful", "reliable"))
+                                                                                  .postId(post.getId())
+                                                                                  .jobType(JobType.PERMANENT)
+                                                                                  .contacts(Contacts.builder()
+                                                                                          .phone("+16463483212")
+                                                                                          .email("Kornevenrok@gmail.com")
+                                                                                          .workEmail("KornevWorker123@bk.ru")
+                                                                                          .build())
+                                                                                  .build();
 
-        CreateEmployeeArgumentDto createEmployeeArgDto = CreateEmployeeArgumentDto
-                .builder()
-                .firstName("Artem")
-                .lastName("Kornev")
-                .description("")
-                .characteristics(List.of("shy", "tactful", "resourceful", "reliable"))
-                .postId(post.getId())
-                .jobType(JobType.PERMANENT)
-                .contacts(Contacts.builder()
-                        .phone("+16463483212")
-                        .email("Kornevenrok@gmail.com")
-                        .workEmail("KornevWorker123@bk.ru")
-                        .build())
-                .build();
-
+        // Act
         List<EmployeeDto> response = webTestClient.post()
                                                   .uri(uriBuilder -> uriBuilder.path("employee/create")
                                                                                .build())
                                                   .bodyValue(createEmployeeArgDto)
                                                   .exchange()
+
+                                                  // Assert
                                                   .expectStatus()
                                                   .isOk()
                                                   .expectBodyList(EmployeeDto.class)
@@ -137,32 +149,33 @@ public class EmployeeControllerIT {
 
     @Test
     void update() {
-        Post post = postService.create(CreatePostArgument.builder()
-                .name("Frontend")
-                .build());
-
-        CreateEmployeeArgumentDto createEmployeeArgDto = CreateEmployeeArgumentDto
-                .builder()
-                .firstName("Artem")
-                .lastName("Kornev")
-                .description("")
-                .characteristics(List.of("shy", "tactful", "resourceful", "reliable"))
-                .postId(post.getId())
-                .jobType(JobType.PERMANENT)
-                .contacts(Contacts.builder()
-                        .phone("+16463483212")
-                        .email("Kornevenrok@gmail.com")
-                        .workEmail("KornevWorker123@bk.ru")
-                        .build())
-                .build();
-
+        // Arrange
         UUID updatedId = employees.get(0).getId();
-
+        Post post = postService.create(CreatePostArgument.builder()
+                                                         .name("Frontend")
+                                                         .build());
+        UpdateEmployeeArgumentDto updateEmployeeArgDto = UpdateEmployeeArgumentDto.builder()
+                                                                                  .firstName("Artem")
+                                                                                  .lastName("Kornev")
+                                                                                  .description("")
+                                                                                  .characteristics(List.of
+                                                                                        ("shy", "tactful", "resourceful", "reliable"))
+                                                                                  .postId(post.getId())
+                                                                                  .jobType(JobType.PERMANENT)
+                                                                                  .contacts(Contacts.builder()
+                                                                                          .phone("+16463483212")
+                                                                                          .email("Kornevenrok@gmail.com")
+                                                                                          .workEmail("KornevWorker123@bk.ru")
+                                                                                          .build())
+                                                                                  .build();
+        // Act
         List<EmployeeDto> response = webTestClient.put()
                                                   .uri(uriBuilder -> uriBuilder.path("employee/update/" + updatedId)
                                                                                .build())
-                                                  .bodyValue(createEmployeeArgDto)
+                                                  .bodyValue(updateEmployeeArgDto)
                                                   .exchange()
+
+                                                  // Assert
                                                   .expectStatus()
                                                   .isOk()
                                                   .expectBodyList(EmployeeDto.class)
@@ -179,12 +192,15 @@ public class EmployeeControllerIT {
 
     @Test
     void delete() {
+        // Arrange
         Employee deletedEmployee = employees.get(0);
 
+        // Act
         webTestClient.delete()
                      .uri(uriBuilder -> uriBuilder.path("employee/delete/" + deletedEmployee.getId())
                                                   .build())
                      .exchange()
+                     // Assert
                      .expectStatus()
                      .isOk();
 

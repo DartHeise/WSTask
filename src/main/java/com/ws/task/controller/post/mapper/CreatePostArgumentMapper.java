@@ -1,10 +1,8 @@
-package com.ws.task.mapper.argumentDto;
+package com.ws.task.controller.post.mapper;
 
 import com.ws.task.controller.post.dto.CreatePostArgumentDto;
-import com.ws.task.service.postService.CreatePostArgument;
+import com.ws.task.service.postService.arguments.CreatePostArgument;
 import org.mapstruct.Mapper;
-
-import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface CreatePostArgumentMapper {

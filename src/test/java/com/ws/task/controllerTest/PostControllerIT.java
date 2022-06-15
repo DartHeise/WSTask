@@ -3,9 +3,10 @@ package com.ws.task.controllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ws.task.controller.post.dto.CreatePostArgumentDto;
 import com.ws.task.controller.post.dto.PostDto;
+import com.ws.task.controller.post.dto.UpdatePostArgumentDto;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.Post;
-import com.ws.task.service.postService.CreatePostArgument;
+import com.ws.task.service.postService.arguments.CreatePostArgument;
 import com.ws.task.service.postService.PostService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,12 +45,16 @@ public class PostControllerIT {
 
     @Test
     void get() {
+        // Arrange
         Post backendPost = posts.get(0);
 
+        // Act
         List<PostDto> response = webTestClient.get()
                                               .uri(uriBuilder -> uriBuilder.path("post/get/" + backendPost.getId().toString())
                                                                            .build())
                                               .exchange()
+
+                                              // Assert
                                               .expectStatus()
                                               .isOk()
                                               .expectBodyList(PostDto.class)
@@ -66,10 +71,13 @@ public class PostControllerIT {
 
     @Test
     void getAll() {
+        // Act
         List<PostDto> response = webTestClient.get()
                                               .uri(uriBuilder -> uriBuilder.path("post/getAll")
                                                                            .build())
                                               .exchange()
+
+                                              // Assert
                                               .expectStatus()
                                               .isOk()
                                               .expectBodyList(PostDto.class)
@@ -93,18 +101,22 @@ public class PostControllerIT {
 
     @Test
     void post() {
+        // Arrange
         CreatePostArgumentDto createPostArg = CreatePostArgumentDto.builder()
                                                                    .name("Mobile")
                                                                    .build();
 
+        // Act
         List<PostDto> response = webTestClient.post()
                                               .uri(uriBuilder -> uriBuilder.path("post/create")
                                                                            .build())
                                               .bodyValue(createPostArg)
                                               .exchange()
+
+                                              // Assert
                                               .expectStatus()
                                               .isOk()
-                                             .expectBodyList(PostDto.class)
+                                              .expectBodyList(PostDto.class)
                                               .returnResult()
                                               .getResponseBody();
 
@@ -119,16 +131,20 @@ public class PostControllerIT {
 
     @Test
     void update() {
-        CreatePostArgumentDto createPostArg = CreatePostArgumentDto.builder()
+        // Arrange
+        UUID updatedId = posts.get(0).getId();
+        UpdatePostArgumentDto updatePostArg = UpdatePostArgumentDto.builder()
                                                                    .name("Mobile")
                                                                    .build();
-        UUID updatedId = posts.get(0).getId();
 
+        // Act
         List<PostDto> response = webTestClient.put()
                                               .uri(uriBuilder -> uriBuilder.path("post/update/" + updatedId)
                                                                            .build())
-                                              .bodyValue(createPostArg)
+                                              .bodyValue(updatePostArg)
                                               .exchange()
+
+                                              // Assert
                                               .expectStatus()
                                               .isOk()
                                               .expectBodyList(PostDto.class)
@@ -146,12 +162,16 @@ public class PostControllerIT {
 
     @Test
     void delete() {
+        // Arrange
         Post deletedPost = posts.get(0);
 
+        // Act
         webTestClient.delete()
                      .uri(uriBuilder -> uriBuilder.path("post/delete/" + deletedPost.getId())
                                                   .build())
                      .exchange()
+
+                     // Assert
                      .expectStatus()
                      .isOk();
 

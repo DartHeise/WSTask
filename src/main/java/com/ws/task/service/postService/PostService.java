@@ -4,6 +4,8 @@ import com.ws.task.exception.NotFoundException;
 import com.ws.task.mapper.model.PostMapper;
 import com.ws.task.mapper.model.PostMapperImpl;
 import com.ws.task.model.Post;
+import com.ws.task.service.postService.arguments.CreatePostArgument;
+import com.ws.task.service.postService.arguments.UpdatePostArgument;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -38,18 +40,16 @@ public class PostService {
         return post;
     }
 
-    public Post update(CreatePostArgument createPostArg, UUID id) {
+    public Post update(UpdatePostArgument updatePostArg, UUID id) {
         throwNotFoundExceptionIfNotExists(id);
 
-        Post post = postMapper.toPost(createPostArg, id);
+        Post post = postMapper.toPost(updatePostArg, id);
         posts.replace(post.getId(), post);
 
         return post;
     }
 
     public void delete(UUID id) {
-        throwNotFoundExceptionIfNotExists(id);
-
         posts.remove(id);
     }
 

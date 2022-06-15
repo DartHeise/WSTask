@@ -1,4 +1,4 @@
-package com.ws.task.service.employeeService;
+package com.ws.task.service.employeeService.arguments;
 
 import com.ws.task.model.Post;
 import com.ws.task.model.employee.Contacts;
