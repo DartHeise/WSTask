@@ -1,18 +1,14 @@
 package com.ws.task.controllerTest;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ws.task.controller.employee.dto.CreateEmployeeArgumentDto;
+import com.ws.task.controller.employee.dto.CreateEmployeeDto;
 import com.ws.task.controller.employee.dto.EmployeeDto;
-import com.ws.task.controller.employee.dto.UpdateEmployeeArgumentDto;
-import com.ws.task.exception.NotFoundException;
-import com.ws.task.model.Post;
-import com.ws.task.model.employee.Contacts;
+import com.ws.task.controller.employee.mapper.EmployeeControllerMapper;
+import com.ws.task.model.post.Post;
 import com.ws.task.model.employee.Employee;
-import com.ws.task.model.employee.JobType;
-import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
-import com.ws.task.service.postService.arguments.CreatePostArgument;
 import com.ws.task.service.postService.PostService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,9 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,27 +33,36 @@ public class EmployeeControllerIT {
     private EmployeeService employeeService;
 
     @Autowired
-    private  PostService postService;
+    private PostService postService;
+
+    @Autowired
+    private EmployeeControllerMapper employeeControllerMapper;
 
     private List<Employee> employees;
+
+    private List<EmployeeDto> expectedEmployeeDtos;
 
     @BeforeEach
     private void setUp() throws IOException {
         employeeService.deleteAll();
-        CreateEmployeeArgument[] createEmployeeArguments = new ObjectMapper().readValue
-                (new File("src\\test\\java\\com\\ws\\task\\resources\\jsons\\controllerTests\\Employees.json"), CreateEmployeeArgument[].class);
-        Arrays.stream(createEmployeeArguments).forEach(x -> employeeService.create(x));
-        employees = employeeService.getAllOrdered(new SearchingParameters());
+        employees = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\employee\\employees.json"),
+                                                                                         new TypeReference<>() {});
+        expectedEmployeeDtos = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\employee\\expectedEmployeeDtos.json"),
+                                                                                                    new TypeReference<>() {});
+        employeeService.addEmployees(employees);
     }
 
     @Test
     void get() {
         // Arrange
         Employee employee = employees.get(0);
+        EmployeeDto expectedEmployeeDto = expectedEmployeeDtos.get(0);
 
         // Act
         List<EmployeeDto> response = webTestClient.get()
-                                                  .uri(uriBuilder -> uriBuilder.path("employee/get/" + employee.getId().toString())
+                                                  .uri(uriBuilder -> uriBuilder.path("employee/" + employee.getId().toString())
                                                                                .build())
                                                   .exchange()
 
@@ -72,9 +75,9 @@ public class EmployeeControllerIT {
 
         Assertions.assertEquals(response.size(), 1);
 
-        EmployeeDto employeeDto = response.get(0);
+        EmployeeDto actualEmployeeDto = response.get(0);
 
-        compareEmployeeDtoToModelEmployee(employeeDto, employee);
+        Assertions.assertEquals(expectedEmployeeDto, actualEmployeeDto);
     }
 
     @Test
@@ -83,10 +86,13 @@ public class EmployeeControllerIT {
         SearchingParameters searchParams = new SearchingParameters();
 
         // Act
-        List<EmployeeDto> response = webTestClient.post()
+        List<EmployeeDto> response = webTestClient.get()
                                                   .uri(uriBuilder -> uriBuilder.path("employee/getAll")
+                                                                               .queryParam("name",
+                                                                                                 searchParams.getName())
+                                                                               .queryParam("postId",
+                                                                                                 searchParams.getPostId())
                                                                                .build())
-                                                  .bodyValue(searchParams)
                                                   .exchange()
 
                                                   // Assert
@@ -99,38 +105,28 @@ public class EmployeeControllerIT {
         Assertions.assertEquals(response.size(), 2);
 
         EmployeeDto firstEmployeeDto = response.get(0);
-        compareEmployeeDtoToModelEmployee(firstEmployeeDto, employees.get(0));
+        Assertions.assertEquals(expectedEmployeeDtos.get(0), firstEmployeeDto);
 
         EmployeeDto secondEmployeeDto = response.get(1);
-        compareEmployeeDtoToModelEmployee(secondEmployeeDto, employees.get(1));
+        Assertions.assertEquals(expectedEmployeeDtos.get(1), secondEmployeeDto);
     }
 
     @Test
-    void post() {
+    void create() throws IOException {
         // Arrange
-        Post post = postService.create(CreatePostArgument.builder()
-                                                         .name("Frontend")
-                                                         .build());
-        CreateEmployeeArgumentDto createEmployeeArgDto = CreateEmployeeArgumentDto.builder()
-                                                                                  .firstName("Artem")
-                                                                                  .lastName("Kornev")
-                                                                                  .description("")
-                                                                                  .characteristics(List.of
-                                                                                        ("shy", "tactful", "resourceful", "reliable"))
-                                                                                  .postId(post.getId())
-                                                                                  .jobType(JobType.PERMANENT)
-                                                                                  .contacts(Contacts.builder()
-                                                                                          .phone("+16463483212")
-                                                                                          .email("Kornevenrok@gmail.com")
-                                                                                          .workEmail("KornevWorker123@bk.ru")
-                                                                                          .build())
-                                                                                  .build();
+        List<Post> posts = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\employee\\postForCreate.json"),
+                                                                                             new TypeReference<>() {});
+        postService.addPosts(posts);
+        CreateEmployeeDto createEmployeeDto = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\employee\\employeeForCreate.json"),
+                                                                                                 new TypeReference<>() {});
 
         // Act
         List<EmployeeDto> response = webTestClient.post()
                                                   .uri(uriBuilder -> uriBuilder.path("employee/create")
                                                                                .build())
-                                                  .bodyValue(createEmployeeArgDto)
+                                                  .bodyValue(createEmployeeDto)
                                                   .exchange()
 
                                                   // Assert
@@ -142,37 +138,30 @@ public class EmployeeControllerIT {
 
         Assertions.assertEquals(response.size(), 1);
 
-        EmployeeDto createdEmployeeDto = response.get(0);
-        compareEmployeeDtoToModelEmployee
-                (createdEmployeeDto, employeeService.get(createdEmployeeDto.getId()));
+        EmployeeDto actualEmployeeDto = response.get(0);
+        EmployeeDto createdEmployee = employeeControllerMapper.toEmployeeDto
+                (employeeService.get(actualEmployeeDto.getId()), actualEmployeeDto.getPostId());
+
+        Assertions.assertEquals(createdEmployee, actualEmployeeDto);
     }
 
     @Test
-    void update() {
+    void update() throws IOException {
         // Arrange
         UUID updatedId = employees.get(0).getId();
-        Post post = postService.create(CreatePostArgument.builder()
-                                                         .name("Frontend")
-                                                         .build());
-        UpdateEmployeeArgumentDto updateEmployeeArgDto = UpdateEmployeeArgumentDto.builder()
-                                                                                  .firstName("Artem")
-                                                                                  .lastName("Kornev")
-                                                                                  .description("")
-                                                                                  .characteristics(List.of
-                                                                                        ("shy", "tactful", "resourceful", "reliable"))
-                                                                                  .postId(post.getId())
-                                                                                  .jobType(JobType.PERMANENT)
-                                                                                  .contacts(Contacts.builder()
-                                                                                          .phone("+16463483212")
-                                                                                          .email("Kornevenrok@gmail.com")
-                                                                                          .workEmail("KornevWorker123@bk.ru")
-                                                                                          .build())
-                                                                                  .build();
+        List<Post> posts = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\employee\\postForUpdate.json"),
+                                                                                             new TypeReference<>() {});
+        postService.addPosts(posts);
+        CreateEmployeeDto updateEmployeeDto = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\employee\\employeeForUpdate.json"),
+                                                                                                 new TypeReference<>() {});
+
         // Act
         List<EmployeeDto> response = webTestClient.put()
                                                   .uri(uriBuilder -> uriBuilder.path("employee/update/" + updatedId)
                                                                                .build())
-                                                  .bodyValue(updateEmployeeArgDto)
+                                                  .bodyValue(updateEmployeeDto)
                                                   .exchange()
 
                                                   // Assert
@@ -184,10 +173,11 @@ public class EmployeeControllerIT {
 
         Assertions.assertEquals(response.size(), 1);
 
-        EmployeeDto employeeDto = response.get(0);
-        Employee updatedEmployee = employeeService.get(updatedId);
+        EmployeeDto actualEmployeeDto = response.get(0);
+        EmployeeDto updatedEmployee = employeeControllerMapper.toEmployeeDto
+                (employeeService.get(updatedId), actualEmployeeDto.getPostId());
 
-        compareEmployeeDtoToModelEmployee(employeeDto, updatedEmployee);
+        Assertions.assertEquals(updatedEmployee, actualEmployeeDto);
     }
 
     @Test
@@ -205,18 +195,5 @@ public class EmployeeControllerIT {
                      .isOk();
 
         Assertions.assertEquals(1, employeeService.getAllOrdered(new SearchingParameters()).size());
-
-        Assertions.assertThrows(NotFoundException.class, () -> employeeService.get(deletedEmployee.getId()));
-    }
-
-    private void compareEmployeeDtoToModelEmployee(EmployeeDto employeeDto, Employee employee) {
-        Assertions.assertEquals(employeeDto.getFirstName(), employee.getFirstName());
-        Assertions.assertEquals(employeeDto.getLastName(), employee.getLastName());
-        Assertions.assertEquals(employeeDto.getDescription(), employee.getDescription());
-        Assertions.assertEquals(employeeDto.getCharacteristics(), employee.getCharacteristics());
-        Assertions.assertEquals(employeeDto.getPost(), employee.getPost());
-        Assertions.assertEquals(employeeDto.getId(), employee.getId());
-        Assertions.assertEquals(employeeDto.getContacts(), employee.getContacts());
-        Assertions.assertEquals(employeeDto.getJobType(), employee.getJobType());
     }
 }

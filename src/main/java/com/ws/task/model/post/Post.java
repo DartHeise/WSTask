@@ -1,4 +1,4 @@
-package com.ws.task.model;
+package com.ws.task.model.post;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

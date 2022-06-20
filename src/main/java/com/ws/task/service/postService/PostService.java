@@ -1,26 +1,27 @@
 package com.ws.task.service.postService;
 
 import com.ws.task.exception.NotFoundException;
-import com.ws.task.mapper.model.PostMapper;
-import com.ws.task.mapper.model.PostMapperImpl;
-import com.ws.task.model.Post;
-import com.ws.task.service.postService.arguments.CreatePostArgument;
-import com.ws.task.service.postService.arguments.UpdatePostArgument;
+import com.ws.task.model.post.mapper.PostMapper;
+import com.ws.task.model.post.Post;
+import com.ws.task.service.postService.arguments.PostArgument;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
-    private final Map<UUID, Post> posts = new HashMap<>();
+    private final Map<UUID, Post> posts;
 
-    private final PostMapper postMapper = new PostMapperImpl();
+    private final PostMapper postMapper;
 
-    public PostService() {
-        posts.put(UUID.fromString("606b99c0-b621-4f50-b0b6-58ed19ce6be1"),
-                  new Post(UUID.fromString("606b99c0-b621-4f50-b0b6-58ed19ce6be1"),
-                                     "Frontend"));
+    public void addPosts(List<Post> postList) {
+        postList.stream().forEach(x -> posts.put(x.getId(), x));
     }
 
     public Post get(UUID id) {
@@ -33,17 +34,17 @@ public class PostService {
         return new ArrayList<>(posts.values());
     }
 
-    public Post create(CreatePostArgument createPostArg) {
-        Post post = postMapper.toPost(createPostArg, UUID.randomUUID());
+    public Post create(PostArgument postArgument) {
+        Post post = postMapper.toPost(postArgument, UUID.randomUUID());
         posts.put(post.getId(), post);
 
         return post;
     }
 
-    public Post update(UpdatePostArgument updatePostArg, UUID id) {
+    public Post update(PostArgument postArgument, UUID id) {
         throwNotFoundExceptionIfNotExists(id);
 
-        Post post = postMapper.toPost(updatePostArg, id);
+        Post post = postMapper.toPost(postArgument, id);
         posts.replace(post.getId(), post);
 
         return post;
@@ -59,6 +60,6 @@ public class PostService {
 
     private void throwNotFoundExceptionIfNotExists(UUID id) {
         if (!posts.containsKey(id))
-            throw new NotFoundException();
+            throw new NotFoundException("Post not found");
     }
 }

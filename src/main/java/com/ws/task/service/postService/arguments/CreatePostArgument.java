@@ -1,13 +1,10 @@
 package com.ws.task.service.postService.arguments;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
-@Builder
-@Getter
+@SuperBuilder
 @Jacksonized
-public class CreatePostArgument {
+public class CreatePostArgument extends PostArgument {
 
-    private final String name;
 }

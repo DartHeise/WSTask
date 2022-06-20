@@ -1,11 +1,10 @@
 package com.ws.task.service.employeeService;
 
 import com.ws.task.exception.NotFoundException;
-import com.ws.task.mapper.model.EmployeeMapper;
-import com.ws.task.mapper.model.EmployeeMapperImpl;
+import com.ws.task.model.employee.mapper.EmployeeMapper;
 import com.ws.task.model.employee.Employee;
-import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
-import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
+import com.ws.task.service.employeeService.arguments.EmployeeArgument;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -13,26 +12,21 @@ import java.util.*;
 import java.util.stream.Stream;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeService {
 
-    private final Map<UUID, Employee> employees = new HashMap<>();
+    private final Map<UUID, Employee> employees;
 
-    private final EmployeeMapper employeeMapper = new EmployeeMapperImpl();
+    private final EmployeeMapper employeeMapper;
+
+    public void addEmployees(List<Employee> employeeList) {
+        employeeList.stream().forEach(x -> employees.put(x.getId(), x));
+    }
 
     public List<Employee> getAllOrdered(SearchingParameters searchParams) {
+        Stream<Employee> employeeStream = filterBySearchingParameters(searchParams);
 
-        List<Employee> employees = new ArrayList<>(this.employees.values());
-        Stream<Employee> stream = employees.stream();
-
-        if (!StringUtils.isBlank(searchParams.getName())) {
-            stream = stream.filter(x -> StringUtils.containsIgnoreCase(x.getLastName(), searchParams.getName())
-                                || StringUtils.containsIgnoreCase(x.getFirstName(), searchParams.getName()));
-        }
-        if (searchParams.getPostId() != null) {
-            stream = stream.filter(x -> x.getPost().getId().equals(searchParams.getPostId()));
-        }
-
-        return stream.sorted(Comparator.comparing(Employee::getLastName)
+        return employeeStream.sorted(Comparator.comparing(Employee::getLastName)
                 .thenComparing(Employee::getFirstName)).toList();
     }
 
@@ -42,17 +36,17 @@ public class EmployeeService {
         return employees.get(id);
     }
 
-    public Employee create(CreateEmployeeArgument createEmployeeArg) {
-        Employee employee = employeeMapper.toEmployee(createEmployeeArg, UUID.randomUUID());
+    public Employee create(EmployeeArgument employeeArgument) {
+        Employee employee = employeeMapper.toEmployee(employeeArgument, UUID.randomUUID());
         employees.put(employee.getId(), employee);
 
         return employee;
     }
 
-    public Employee update(UpdateEmployeeArgument updateEmployeeArg, UUID id) {
+    public Employee update(EmployeeArgument employeeArgument, UUID id) {
         throwNotFoundExceptionIfNotExists(id);
 
-        Employee employee = employeeMapper.toEmployee(updateEmployeeArg, id);
+        Employee employee = employeeMapper.toEmployee(employeeArgument, id);
         employees.replace(employee.getId(), employee);
 
         return employee;
@@ -68,6 +62,21 @@ public class EmployeeService {
 
     private void throwNotFoundExceptionIfNotExists(UUID id) {
         if (!employees.containsKey(id))
-            throw new NotFoundException();
+            throw new NotFoundException("Employee not found");
+    }
+
+    private Stream<Employee> filterBySearchingParameters(SearchingParameters searchParams) {
+        List<Employee> employees = new ArrayList<>(this.employees.values());
+        Stream<Employee> employeeStream = employees.stream();
+
+        if (!StringUtils.isBlank(searchParams.getName())) {
+            employeeStream = employeeStream.filter(x -> StringUtils.containsIgnoreCase(x.getLastName(), searchParams.getName())
+                    || StringUtils.containsIgnoreCase(x.getFirstName(), searchParams.getName()));
+        }
+        if (searchParams.getPostId() != null) {
+            employeeStream = employeeStream.filter(x -> x.getPost().getId().equals(searchParams.getPostId()));
+        }
+
+        return employeeStream;
     }
 }

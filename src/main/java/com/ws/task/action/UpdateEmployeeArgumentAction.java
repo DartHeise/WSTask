@@ -1,6 +1,6 @@
 package com.ws.task.action;
 
-import com.ws.task.controller.employee.dto.UpdateEmployeeArgumentDto;
+import com.ws.task.controller.employee.dto.UpdateEmployeeDto;
 import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
 import com.ws.task.service.postService.PostService;
 import lombok.RequiredArgsConstructor;
@@ -12,15 +12,15 @@ public class UpdateEmployeeArgumentAction {
 
     private final PostService postService;
 
-    public UpdateEmployeeArgument execute(UpdateEmployeeArgumentDto updateEmployeeArgDto) {
+    public UpdateEmployeeArgument execute(UpdateEmployeeDto updateEmployeeDto) {
         return UpdateEmployeeArgument.builder()
-                .firstName(updateEmployeeArgDto.getFirstName())
-                .lastName(updateEmployeeArgDto.getLastName())
-                .description(updateEmployeeArgDto.getDescription())
-                .characteristics(updateEmployeeArgDto.getCharacteristics())
-                .post(postService.get(updateEmployeeArgDto.getPostId()))
-                .contacts(updateEmployeeArgDto.getContacts())
-                .jobType(updateEmployeeArgDto.getJobType())
-                .build();
+                                     .firstName(updateEmployeeDto.getFirstName())
+                                     .lastName(updateEmployeeDto.getLastName())
+                                     .description(updateEmployeeDto.getDescription())
+                                     .characteristics(updateEmployeeDto.getCharacteristics())
+                                     .post(postService.get(updateEmployeeDto.getPostId()))
+                                     .contacts(updateEmployeeDto.getContacts())
+                                     .jobType(updateEmployeeDto.getJobType())
+                                     .build();
     }
 }

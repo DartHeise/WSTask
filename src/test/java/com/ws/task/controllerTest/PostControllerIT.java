@@ -1,12 +1,12 @@
 package com.ws.task.controllerTest;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ws.task.controller.post.dto.CreatePostArgumentDto;
+import com.ws.task.controller.post.dto.CreatePostDto;
 import com.ws.task.controller.post.dto.PostDto;
-import com.ws.task.controller.post.dto.UpdatePostArgumentDto;
-import com.ws.task.exception.NotFoundException;
-import com.ws.task.model.Post;
-import com.ws.task.service.postService.arguments.CreatePostArgument;
+import com.ws.task.controller.post.dto.UpdatePostDto;
+import com.ws.task.controller.post.mapper.PostControllerMapper;
+import com.ws.task.model.post.Post;
 import com.ws.task.service.postService.PostService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,9 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,25 +30,34 @@ public class PostControllerIT {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private PostControllerMapper postControllerMapper;
+
     private List<Post> posts;
+
+    private List<PostDto> expectedPostDtos;
 
     @BeforeEach
     private void setUp() throws IOException {
         postService.deleteAll();
-        CreatePostArgument[] createPostArguments = new ObjectMapper().readValue
-                (new File("src\\test\\java\\com\\ws\\task\\resources\\jsons\\controllerTests\\posts.json"), CreatePostArgument[].class);
-        Arrays.stream(createPostArguments).forEach(x -> postService.create(x));
-        posts = postService.getAll();
+        posts = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\post\\posts.json"),
+                                                                                 new TypeReference<>() {});
+        expectedPostDtos = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\post\\expectedPostDtos.json"),
+                                                                                            new TypeReference<>() {});
+        postService.addPosts(posts);
     }
 
     @Test
     void get() {
         // Arrange
         Post backendPost = posts.get(0);
+        PostDto expectedPostDto = expectedPostDtos.get(0);
 
         // Act
         List<PostDto> response = webTestClient.get()
-                                              .uri(uriBuilder -> uriBuilder.path("post/get/" + backendPost.getId().toString())
+                                              .uri(uriBuilder -> uriBuilder.path("post/" + backendPost.getId().toString())
                                                                            .build())
                                               .exchange()
 
@@ -63,10 +70,9 @@ public class PostControllerIT {
 
         Assertions.assertEquals(response.size(), 1);
 
-        PostDto postDto = response.get(0);
+        PostDto actualPostDto = response.get(0);
 
-        Assertions.assertEquals(postDto.getName(), backendPost.getName());
-        Assertions.assertEquals(postDto.getId(), backendPost.getId());
+        Assertions.assertEquals(expectedPostDto, actualPostDto);
     }
 
     @Test
@@ -87,30 +93,27 @@ public class PostControllerIT {
         Assertions.assertEquals(response.size(), 3);
 
         PostDto backendResponse = response.get(0);
-        Assertions.assertEquals(backendResponse.getName(), posts.get(0).getName());
-        Assertions.assertEquals(backendResponse.getId(), posts.get(0).getId());
+        Assertions.assertEquals(expectedPostDtos.get(0), backendResponse);
 
         PostDto frontendResponse = response.get(1);
-        Assertions.assertEquals(frontendResponse.getName(), posts.get(1).getName());
-        Assertions.assertEquals(frontendResponse.getId(), posts.get(1).getId());
+        Assertions.assertEquals(expectedPostDtos.get(1), frontendResponse);
 
         PostDto fullstackResponse = response.get(2);
-        Assertions.assertEquals(fullstackResponse.getName(), posts.get(2).getName());
-        Assertions.assertEquals(fullstackResponse.getId(), posts.get(2).getId());
+        Assertions.assertEquals(expectedPostDtos.get(2), fullstackResponse);
     }
 
     @Test
-    void post() {
+    void create() throws IOException {
         // Arrange
-        CreatePostArgumentDto createPostArg = CreatePostArgumentDto.builder()
-                                                                   .name("Mobile")
-                                                                   .build();
+        CreatePostDto createPostDto = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\post\\postForCreate.json"),
+                                                                                              CreatePostDto.class);
 
         // Act
         List<PostDto> response = webTestClient.post()
                                               .uri(uriBuilder -> uriBuilder.path("post/create")
                                                                            .build())
-                                              .bodyValue(createPostArg)
+                                              .bodyValue(createPostDto)
                                               .exchange()
 
                                               // Assert
@@ -122,26 +125,25 @@ public class PostControllerIT {
 
         Assertions.assertEquals(response.size(), 1);
 
-        PostDto postDto = response.get(0);
-        Post createdPost = postService.get(postDto.getId());
+        PostDto actualPostDto = response.get(0);
+        PostDto createdPost = postControllerMapper.toPostDto(postService.get(actualPostDto.getId()));
 
-        Assertions.assertEquals(postDto.getName(), createdPost.getName());
-        Assertions.assertEquals(postDto.getId(), createdPost.getId());
+        Assertions.assertEquals(createdPost, actualPostDto);
     }
 
     @Test
-    void update() {
+    void update() throws IOException {
         // Arrange
         UUID updatedId = posts.get(0).getId();
-        UpdatePostArgumentDto updatePostArg = UpdatePostArgumentDto.builder()
-                                                                   .name("Mobile")
-                                                                   .build();
+        UpdatePostDto updatePostDto = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\controllerTests\\post\\postForUpdate.json"),
+                                                                                              UpdatePostDto.class);
 
         // Act
         List<PostDto> response = webTestClient.put()
                                               .uri(uriBuilder -> uriBuilder.path("post/update/" + updatedId)
                                                                            .build())
-                                              .bodyValue(updatePostArg)
+                                              .bodyValue(updatePostDto)
                                               .exchange()
 
                                               // Assert
@@ -153,11 +155,10 @@ public class PostControllerIT {
 
         Assertions.assertEquals(response.size(), 1);
 
-        PostDto postDto = response.get(0);
-        Post updatedPost = postService.get(updatedId);
+        PostDto actualPostDto = response.get(0);
+        PostDto updatedPost = postControllerMapper.toPostDto(postService.get(updatedId));
 
-        Assertions.assertEquals(postDto.getName(), updatedPost.getName());
-        Assertions.assertEquals(postDto.getId(), updatedPost.getId());
+        Assertions.assertEquals(updatedPost, actualPostDto);
     }
 
     @Test
@@ -176,7 +177,5 @@ public class PostControllerIT {
                      .isOk();
 
         Assertions.assertEquals(2, postService.getAll().size());
-
-        Assertions.assertThrows(NotFoundException.class, () -> postService.get(deletedPost.getId()));
     }
 }

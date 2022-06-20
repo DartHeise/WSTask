@@ -1,6 +1,6 @@
 package com.ws.task.action;
 
-import com.ws.task.controller.employee.dto.CreateEmployeeArgumentDto;
+import com.ws.task.controller.employee.dto.CreateEmployeeDto;
 import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
 import com.ws.task.service.postService.PostService;
 import lombok.RequiredArgsConstructor;
@@ -12,15 +12,15 @@ public class CreateEmployeeArgumentAction {
 
     private final PostService postService;
 
-    public CreateEmployeeArgument execute(CreateEmployeeArgumentDto createEmployeeArgDto) {
+    public CreateEmployeeArgument execute(CreateEmployeeDto createEmployeeDto) {
         return CreateEmployeeArgument.builder()
-                                     .firstName(createEmployeeArgDto.getFirstName())
-                                     .lastName(createEmployeeArgDto.getLastName())
-                                     .description(createEmployeeArgDto.getDescription())
-                                     .characteristics(createEmployeeArgDto.getCharacteristics())
-                                     .post(postService.get(createEmployeeArgDto.getPostId()))
-                                     .contacts(createEmployeeArgDto.getContacts())
-                                     .jobType(createEmployeeArgDto.getJobType())
+                                     .firstName(createEmployeeDto.getFirstName())
+                                     .lastName(createEmployeeDto.getLastName())
+                                     .description(createEmployeeDto.getDescription())
+                                     .characteristics(createEmployeeDto.getCharacteristics())
+                                     .post(postService.get(createEmployeeDto.getPostId()))
+                                     .contacts(createEmployeeDto.getContacts())
+                                     .jobType(createEmployeeDto.getJobType())
                                      .build();
     }
 }

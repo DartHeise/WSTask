@@ -1,0 +1,19 @@
+[
+  {
+    "id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+    "firstName": "Ivan",
+    "lastName": "Ivanov",
+    "description": "",
+    "characteristics": ["active", "cynical", "hard-working", "enthusiastic"],
+    "post": {
+      "id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
+      "name": "Frontend"
+    },
+    "jobType": "TEMPORARY",
+    "contacts": {
+      "phone": "+16463211930",
+      "email": "Ivanov14@mail.ru",
+      "workEmail": "IvanovWorker321@bk.ru"
+    }
+  }
+]

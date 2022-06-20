@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @Jacksonized
 @Data
-public class UpdateEmployeeArgumentDto {
+public class UpdateEmployeeDto {
 
     @NotBlank(message = "Необходимо указать имя")
     private final String firstName;

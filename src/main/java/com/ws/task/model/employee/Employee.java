@@ -1,8 +1,7 @@
 package com.ws.task.model.employee;
 
-import com.ws.task.model.Post;
+import com.ws.task.model.post.Post;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +11,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Builder
 public class Employee {
 
     private UUID id;

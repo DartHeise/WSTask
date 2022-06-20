@@ -1,20 +1,16 @@
-package com.ws.task.controller.employee.dto;
+package com.ws.task.service.employeeService.arguments;
 
+import com.ws.task.model.post.Post;
 import com.ws.task.model.employee.Contacts;
 import com.ws.task.model.employee.JobType;
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.jackson.Jacksonized;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
-import java.util.UUID;
 
-@Builder
-@Jacksonized
-@Data
-public class EmployeeDto {
-
-    private final UUID id;
+@SuperBuilder
+@Getter
+public abstract class EmployeeArgument {
 
     private final String firstName;
 
@@ -24,7 +20,7 @@ public class EmployeeDto {
 
     private final List<String> characteristics;
 
-    private final UUID postId;
+    private final Post post;
 
     private final JobType jobType;
 
