@@ -4,9 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.employee.Employee;
+import com.ws.task.model.employee.mapper.EmployeeMapper;
 import com.ws.task.model.employee.mapper.EmployeeMapperImpl;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
+import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
+import com.ws.task.service.employeeService.arguments.EmployeeArgument;
+import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,8 +30,8 @@ public class EmployeeServiceTest {
     public void setUp() throws IOException {
         employeeService = new EmployeeService(new HashMap<>(), new EmployeeMapperImpl());
         employees = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employees.json"),
-                                                                            new TypeReference<>() {});
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employees.json"),
+                                                                                      new TypeReference<>() {});
         employeeService.addEmployees(employees);
     }
 
@@ -35,8 +39,8 @@ public class EmployeeServiceTest {
     public void getAllOrderedWithoutSearchingParameters() throws Exception {
         // Arrange
         List<Employee> expected = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\sortedEmployees.json"),
-                                                                                  new TypeReference<>() {});
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\sortedEmployees.json"),
+                                                                                            new TypeReference<>() {});
         List<Employee> actual;
 
         // Act
@@ -50,8 +54,8 @@ public class EmployeeServiceTest {
     public void getAllOrderedWithIdOnly() throws Exception {
         // Arrange
         List<Employee> expected = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employeesWithBackendId.json"),
-                                                                                         new TypeReference<>() {});
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employeesWithBackendId.json"),
+                                                                                                   new TypeReference<>() {});
         List<Employee> actual;
 
         // Act
@@ -66,8 +70,8 @@ public class EmployeeServiceTest {
     public void getAllOrderedWithFirstNameOnly() throws Exception {
         // Arrange
         List<Employee> expected = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employeesWithFirstNameIvan.json"),
-                                                                                             new TypeReference<>() {});
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employeesWithFirstNameIvan.json"),
+                                                                                                       new TypeReference<>() {});
         List<Employee> actual;
 
         // Act
@@ -81,8 +85,8 @@ public class EmployeeServiceTest {
     public void getAllOrderedWithLastNameOnly() throws Exception {
         // Arrange
         List<Employee> expected = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employeesWithLastNameIvanov.json"),
-                                                                                              new TypeReference<>() {});
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employeesWithLastNameIvanov.json"),
+                                                                                                        new TypeReference<>() {});
         List<Employee> actual;
 
         // Act
@@ -96,8 +100,8 @@ public class EmployeeServiceTest {
     public void getAllOrderedWithFirstNameAndId() throws Exception {
         // Arrange
         List<Employee> expected = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employeesWithFirstNameDenisAndBackendId.json"),
-                                                                                                          new TypeReference<>() {});
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employeesWithFirstNameDenisAndBackendId.json"),
+                                                                                                                    new TypeReference<>() {});
         List<Employee> actual;
 
         // Act
@@ -112,8 +116,8 @@ public class EmployeeServiceTest {
     public void getAllOrderedWithLastNameAndId() throws Exception {
         // Arrange
         List<Employee> expected = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\EmployeesWithLastNameLosevAndBackendId.json"),
-                                                                                                         new TypeReference<>() {});
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\EmployeesWithLastNameLosevAndBackendId.json"),
+                                                                                                                   new TypeReference<>() {});
         List<Employee> actual;
 
         // Act
@@ -128,8 +132,8 @@ public class EmployeeServiceTest {
     public void getEmployeeById() throws IOException {
         // Arrange
         Employee expected = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employeeForGetEmployeeByIdTest.json"),
-                                                                                                           Employee.class);
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employeeForGetEmployeeByIdTest.json"),
+                                                                                                                     Employee.class);
         Employee actual;
 
         // Act
@@ -143,14 +147,71 @@ public class EmployeeServiceTest {
     public void getNotExistingEmployeeById() throws IOException {
         // Arrange
         Employee employee = new ObjectMapper().readValue
-                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employeeForGetNotExistingEmployeeByIdTest.json"),
-                                                                                                                      Employee.class);
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employeeForGetNotExistingEmployeeByIdTest.json"),
+                                                                                                                                Employee.class);
         NotFoundException exception;
         String expectedMessage = "Employee not found";
 
         // Act & Assert
         exception = Assertions.assertThrows(NotFoundException.class, () -> employeeService.get(employee.getId()));
         Assertions.assertTrue(exception.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    public void createEmployee() throws IOException {
+        // Arrange
+        EmployeeMapper employeeMapper = new EmployeeMapperImpl();
+        EmployeeArgument employeeArgument = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employeeForCreate.json"),
+                                                                                          CreateEmployeeArgument.class);
+        Employee expected;
+        Employee actual;
+
+        // Act
+        actual = employeeService.create(employeeArgument);
+
+        // Assert
+        expected = employeeMapper.toEmployee(employeeArgument, actual.getId());
+        Assertions.assertEquals(expected, actual);
+
+        Assertions.assertEquals
+                (employeeService.getAllOrdered(new SearchingParameters()).size(), 3);
+    }
+
+    @Test
+    public void updateEmployee() throws IOException {
+        // Arrange
+        EmployeeMapper employeeMapper = new EmployeeMapperImpl();
+        EmployeeArgument employeeArgument = new ObjectMapper().readValue
+                (getClass().getClassLoader().getResource("jsons\\serviceTests\\employee\\employeeForCreate.json"),
+                                                                                          UpdateEmployeeArgument.class);
+        Employee expected;
+        Employee actual;
+
+        UUID updatedId = employees.get(0).getId();
+
+        // Act
+        actual = employeeService.update(employeeArgument, updatedId);
+
+        // Assert
+        expected = employeeMapper.toEmployee(employeeArgument, updatedId);
+        Assertions.assertEquals(expected, actual);
+
+        Assertions.assertEquals
+                (employeeService.getAllOrdered(new SearchingParameters()).size(), 2);
+    }
+
+    @Test
+    public void deleteEmployee() {
+        // Arrange
+        UUID deletedEmployeeId = employees.get(0).getId();
+
+        // Act
+        employeeService.delete(deletedEmployeeId);
+
+        // Assert
+        Assertions.assertEquals
+                (employeeService.getAllOrdered(new SearchingParameters()).size(), 1);
     }
 }
 
