@@ -1,5 +1,6 @@
 package com.ws.task.service.employeeService.arguments;
 
+import lombok.Value;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 

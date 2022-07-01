@@ -1,7 +1,7 @@
 package com.ws.task.service.employeeService;
 
+import com.ws.task.controller.employee.mapper.EmployeeMapper;
 import com.ws.task.exception.NotFoundException;
-import com.ws.task.model.employee.mapper.EmployeeMapper;
 import com.ws.task.model.employee.Employee;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import lombok.RequiredArgsConstructor;

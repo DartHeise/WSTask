@@ -3,7 +3,7 @@ package com.ws.task.controller.post;
 import com.ws.task.controller.post.dto.CreatePostDto;
 import com.ws.task.controller.post.dto.PostDto;
 import com.ws.task.controller.post.dto.UpdatePostDto;
-import com.ws.task.controller.post.mapper.PostControllerMapper;
+import com.ws.task.controller.post.mapper.PostMapper;
 import com.ws.task.model.post.Post;
 import com.ws.task.service.postService.PostService;
 import com.ws.task.service.postService.arguments.PostArgument;
@@ -22,13 +22,13 @@ public class PostController {
 
     private final PostService postService;
 
-    private final PostControllerMapper postControllerMapper;
+    private final PostMapper postMapper;
 
     @GetMapping("/{id}")
     @ApiOperation("Получить должность по идентификатору")
     public PostDto getPost(@PathVariable UUID id) {
         Post post = postService.get(id);
-        return postControllerMapper.toPostDto(post);
+        return postMapper.toPostDto(post);
     }
 
     @GetMapping("/getAll")
@@ -36,27 +36,27 @@ public class PostController {
     public List<PostDto> getAllPosts() {
         List<Post> posts = postService.getAll();
         return posts.stream()
-                    .map(postControllerMapper:: toPostDto)
+                    .map(postMapper:: toPostDto)
                     .toList();
     }
 
     @PostMapping("/create")
     @ApiOperation("Добавить должность")
     public PostDto createPost(@RequestBody @Valid CreatePostDto createPostDto) {
-        PostArgument postArgument = postControllerMapper.toUpdatePostArgument(createPostDto);
+        PostArgument postArgument = postMapper.toCreatePostArgument(createPostDto);
         Post createdPost = postService.create(postArgument);
-        return postControllerMapper.toPostDto(createdPost);
+        return postMapper.toPostDto(createdPost);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}/update")
     @ApiOperation("Обновить должность")
     public PostDto updatePost(@PathVariable UUID id, @RequestBody @Valid UpdatePostDto updatePostDto) {
-        PostArgument postArgument = postControllerMapper.toUpdatePostArgument(updatePostDto);
+        PostArgument postArgument = postMapper.toUpdatePostArgument(updatePostDto);
         Post updatedPost = postService.update(postArgument, id);
-        return postControllerMapper.toPostDto(updatedPost);
+        return postMapper.toPostDto(updatedPost);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}/delete")
     @ApiOperation("Удалить должность")
     public void deletePost(@PathVariable UUID id) {
         postService.delete(id);

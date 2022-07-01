@@ -1,28 +1,30 @@
 package com.ws.task.service.employeeService.arguments;
 
-import com.ws.task.model.post.Post;
 import com.ws.task.model.employee.Contacts;
 import com.ws.task.model.employee.JobType;
-import lombok.Getter;
+import com.ws.task.model.post.Post;
+import lombok.Value;
+import lombok.experimental.NonFinal;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
 @SuperBuilder
-@Getter
+@Value
+@NonFinal
 public abstract class EmployeeArgument {
 
-    private final String firstName;
+    String firstName;
 
-    private final String lastName;
+    String lastName;
 
-    private final String description;
+    String description;
 
-    private final List<String> characteristics;
+    List<String> characteristics;
 
-    private final Post post;
+    Post post;
 
-    private final JobType jobType;
+    JobType jobType;
 
-    private final Contacts contacts;
+    Contacts contacts;
 }

@@ -5,15 +5,20 @@ import com.ws.task.controller.post.dto.PostDto;
 import com.ws.task.controller.post.dto.UpdatePostDto;
 import com.ws.task.model.post.Post;
 import com.ws.task.service.postService.arguments.CreatePostArgument;
+import com.ws.task.service.postService.arguments.PostArgument;
 import com.ws.task.service.postService.arguments.UpdatePostArgument;
 import org.mapstruct.Mapper;
 
+import java.util.UUID;
+
 @Mapper
-public interface PostControllerMapper {
+public interface PostMapper {
 
     PostDto toPostDto(Post post);
 
-    CreatePostArgument toUpdatePostArgument(CreatePostDto createPostDto);
+    CreatePostArgument toCreatePostArgument(CreatePostDto createPostDto);
 
     UpdatePostArgument toUpdatePostArgument(UpdatePostDto updatePostDto);
+
+    Post toPost(PostArgument postArgument, UUID id);
 }

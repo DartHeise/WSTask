@@ -102,7 +102,7 @@
 		</resources>
 		<testResources>
 			<testResource>
-				<directory>src/test/java/com/ws/task/resources</directory>
+				<directory>src/test/resources</directory>
 			</testResource>
 		</testResources>
 		<plugins>

@@ -5,7 +5,7 @@ import com.ws.task.action.UpdateEmployeeArgumentAction;
 import com.ws.task.controller.employee.dto.CreateEmployeeDto;
 import com.ws.task.controller.employee.dto.EmployeeDto;
 import com.ws.task.controller.employee.dto.UpdateEmployeeDto;
-import com.ws.task.controller.employee.mapper.EmployeeControllerMapper;
+import com.ws.task.controller.employee.mapper.EmployeeMapper;
 import com.ws.task.model.employee.Employee;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
@@ -25,7 +25,7 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    private final EmployeeControllerMapper employeeControllerMapper;
+    private final EmployeeMapper employeeMapper;
 
     private final CreateEmployeeArgumentAction createEmployeeArgAction;
 
@@ -35,7 +35,7 @@ public class EmployeeController {
     @ApiOperation("Получить работника по идентификатору")
     public EmployeeDto getEmployee(@PathVariable UUID id) {
         Employee employee = employeeService.get(id);
-        return employeeControllerMapper.toEmployeeDto(employee, employee.getPost().getId());
+        return employeeMapper.toEmployeeDto(employee, employee.getPost().getId());
     }
 
     @GetMapping("/getAll")
@@ -43,7 +43,7 @@ public class EmployeeController {
     public List<EmployeeDto> getAllEmployees(SearchingParameters searchingParams) {
         List<Employee> employees = employeeService.getAllOrdered(searchingParams);
         return employees.stream()
-                .map(x -> employeeControllerMapper.toEmployeeDto(x, x.getPost().getId()))
+                .map(x -> employeeMapper.toEmployeeDto(x, x.getPost().getId()))
                 .toList();
     }
 
@@ -52,18 +52,18 @@ public class EmployeeController {
     public EmployeeDto createEmployee(@RequestBody @Valid CreateEmployeeDto createEmployeeDto) {
         EmployeeArgument employeeArgument = createEmployeeArgAction.execute(createEmployeeDto);
         Employee createdEmployee = employeeService.create(employeeArgument);
-        return employeeControllerMapper.toEmployeeDto(createdEmployee, createdEmployee.getPost().getId());
+        return employeeMapper.toEmployeeDto(createdEmployee, createdEmployee.getPost().getId());
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}/update")
     @ApiOperation("Обновить работника")
     public EmployeeDto updateEmployee(@PathVariable UUID id, @RequestBody @Valid UpdateEmployeeDto updateEmployeeDto) {
         EmployeeArgument employeeArgument = updateEmployeeArgAction.execute(updateEmployeeDto);
         Employee updatedEmployee = employeeService.update(employeeArgument, id);
-        return employeeControllerMapper.toEmployeeDto(updatedEmployee, updatedEmployee.getPost().getId());
+        return employeeMapper.toEmployeeDto(updatedEmployee, updatedEmployee.getPost().getId());
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}/delete")
     @ApiOperation("Удалить работника")
     public void deleteEmployee(@PathVariable UUID id) {
         employeeService.delete(id);

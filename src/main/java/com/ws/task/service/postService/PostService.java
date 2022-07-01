@@ -1,7 +1,7 @@
 package com.ws.task.service.postService;
 
+import com.ws.task.controller.post.mapper.PostMapper;
 import com.ws.task.exception.NotFoundException;
-import com.ws.task.model.post.mapper.PostMapper;
 import com.ws.task.model.post.Post;
 import com.ws.task.service.postService.arguments.PostArgument;
 import lombok.RequiredArgsConstructor;
