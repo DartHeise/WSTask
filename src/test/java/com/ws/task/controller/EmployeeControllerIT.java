@@ -1,7 +1,6 @@
 package com.ws.task.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ws.task.controller.employee.dto.CreateEmployeeDto;
 import com.ws.task.controller.employee.dto.EmployeeDto;
 import com.ws.task.controller.employee.dto.UpdateEmployeeDto;
@@ -13,14 +12,18 @@ import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
 import com.ws.task.service.postService.PostService;
+import com.ws.task.util.ReadValueAction;
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
@@ -30,16 +33,14 @@ import java.util.UUID;
 import static org.mockito.Mockito.when;
 
 @AutoConfigureWebTestClient
+@ExtendWith(SoftAssertionsExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class EmployeeControllerIT {
 
     @Autowired
     private WebTestClient webTestClient;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @SpyBean
     private EmployeeService employeeService;
 
     @MockBean
@@ -49,16 +50,19 @@ public class EmployeeControllerIT {
 
     private List<EmployeeDto> expectedEmployeeDtos;
 
-    private SoftAssertions softAssertions = new SoftAssertions();
+    private final ReadValueAction readValueAction = new ReadValueAction();
 
     @BeforeEach
     private void setUp() throws IOException {
-        employees = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\employees.json"),
-                                                                                    new TypeReference<>() {});
-        expectedEmployeeDtos = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\expected_employee_dtos.json"),
-                                                                                                 new TypeReference<>() {});
+        employeeService.deleteAll();
+
+        employees = readValueAction.execute
+                ("jsons\\controller\\employee\\employees.json", new TypeReference<>() {});
+
+        expectedEmployeeDtos = readValueAction.execute
+                ("jsons\\controller\\employee\\expected_employee_dtos.json", new TypeReference<>() {});
+
+        employeeService.addEmployees(employees);
     }
 
     @Test
@@ -87,7 +91,7 @@ public class EmployeeControllerIT {
     }
 
     @Test
-    void getAll() {
+    void getAll(SoftAssertions softAssertions) {
         // Arrange
         when(employeeService.getAllOrdered(new SearchingParameters())).thenReturn(employees);
 
@@ -115,18 +119,18 @@ public class EmployeeControllerIT {
     @Test
     void create() throws IOException {
         // Arrange
-        CreateEmployeeDto createEmployeeDto = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\create_employee_dto.json"),
-                                                                                                 CreateEmployeeDto.class);
-        EmployeeArgument createEmployeeArgument = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\create_employee_argument.json"),
-                                                                                               CreateEmployeeArgument.class);
-        Employee createdEmployee = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\created_employee.json"),
-                                                                                                     Employee.class);
-        Post mobilePost = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\create_mobile_post.json"),
-                                                                                                           Post.class);
+        CreateEmployeeDto createEmployeeDto = readValueAction.execute
+                ("jsons\\controller\\employee\\create_employee_dto.json", CreateEmployeeDto.class);
+
+        EmployeeArgument createEmployeeArgument = readValueAction.execute
+                ("jsons\\controller\\employee\\create_employee_argument.json", CreateEmployeeArgument.class);
+
+        Employee createdEmployee = readValueAction.execute
+                ("jsons\\controller\\employee\\created_employee.json", Employee.class);
+
+        Post mobilePost = readValueAction.execute
+                ("jsons\\controller\\employee\\create_mobile_post.json", Post.class);
+
         UUID mobileId = createEmployeeDto.getPostId();
 
         when(employeeService.create(createEmployeeArgument)).thenReturn(createdEmployee);
@@ -145,9 +149,8 @@ public class EmployeeControllerIT {
                                                   .returnResult()
                                                   .getResponseBody();
 
-        EmployeeDto expectedEmployeeDto = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\create_expected.json"),
-                                                                                                 EmployeeDto.class);
+        EmployeeDto expectedEmployeeDto = readValueAction.execute
+                ("jsons\\controller\\employee\\create_expected.json",  EmployeeDto.class);
 
         Assertions.assertEquals(expectedEmployeeDto, response);
     }
@@ -157,18 +160,18 @@ public class EmployeeControllerIT {
         // Arrange
         UUID updatedId = employees.get(0).getId();
 
-        UpdateEmployeeDto updateEmployeeDto = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\update_employee_dto.json"),
-                                                                                               UpdateEmployeeDto.class);
-        UpdateEmployeeArgument updateEmployeeArgument = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\update_employee_argument.json"),
-                                                                                               UpdateEmployeeArgument.class);
-        Employee updatedEmployee = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\updated_employee.json"),
-                                                                                                     Employee.class);
-        Post mobilePost = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\update_mobile_post.json"),
-                                                                                                           Post.class);
+        UpdateEmployeeDto updateEmployeeDto = readValueAction.execute
+                ("jsons\\controller\\employee\\update_employee_dto.json", UpdateEmployeeDto.class);
+
+        UpdateEmployeeArgument updateEmployeeArgument = readValueAction.execute
+                ("jsons\\controller\\employee\\update_employee_argument.json", UpdateEmployeeArgument.class);
+
+        Employee updatedEmployee = readValueAction.execute
+                ("jsons\\controller\\employee\\updated_employee.json", Employee.class);
+
+        Post mobilePost = readValueAction.execute
+                ("jsons\\controller\\employee\\update_mobile_post.json", Post.class);
+
         UUID mobileId = updateEmployeeDto.getPostId();
 
         when(employeeService.update(updateEmployeeArgument, updatedId)).thenReturn(updatedEmployee);
@@ -187,17 +190,17 @@ public class EmployeeControllerIT {
                                                   .returnResult()
                                                   .getResponseBody();
 
-        EmployeeDto expectedEmployeeDto = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\employee\\update_expected.json"),
-                                                                                                 EmployeeDto.class);
+        EmployeeDto expectedEmployeeDto = readValueAction.execute
+                ("jsons\\controller\\employee\\update_expected.json", EmployeeDto.class);
 
         Assertions.assertEquals(expectedEmployeeDto, response);
     }
 
     @Test
-    void delete() {
+    void delete(SoftAssertions softAssertions) {
         // Arrange
-        UUID deletedEmployeeId = employees.get(0).getId();
+        Employee deletedEmployee = employees.get(0);
+        UUID deletedEmployeeId = deletedEmployee.getId();
 
         // Act
         webTestClient.delete()
@@ -206,5 +209,10 @@ public class EmployeeControllerIT {
                      // Assert
                      .expectStatus()
                      .isOk();
+
+        List<Employee> resultPosts = employeeService.getAllOrdered(new SearchingParameters());
+
+        softAssertions.assertThat(resultPosts.size()).isEqualTo(1);
+        softAssertions.assertThat(resultPosts.contains(deletedEmployee)).isEqualTo(false);
     }
 }

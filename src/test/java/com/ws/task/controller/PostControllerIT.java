@@ -1,7 +1,6 @@
 package com.ws.task.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ws.task.controller.post.dto.CreatePostDto;
 import com.ws.task.controller.post.dto.PostDto;
 import com.ws.task.controller.post.dto.UpdatePostDto;
@@ -10,14 +9,17 @@ import com.ws.task.service.postService.PostService;
 import com.ws.task.service.postService.arguments.CreatePostArgument;
 import com.ws.task.service.postService.arguments.PostArgument;
 import com.ws.task.service.postService.arguments.UpdatePostArgument;
+import com.ws.task.util.ReadValueAction;
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
@@ -27,32 +29,33 @@ import java.util.UUID;
 import static org.mockito.Mockito.when;
 
 @AutoConfigureWebTestClient
+@ExtendWith(SoftAssertionsExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PostControllerIT {
 
     @Autowired
     private WebTestClient webTestClient;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @SpyBean
     private PostService postService;
 
     private List<Post> posts;
 
     private List<PostDto> expectedPostDtos;
 
-    private SoftAssertions softAssertions = new SoftAssertions();
+    private final ReadValueAction readValueAction = new ReadValueAction();
 
     @BeforeEach
     private void setUp() throws IOException {
-        posts = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\posts.json"),
-                                                                            new TypeReference<>() {});
-        expectedPostDtos = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\expected_post_dtos.json"),
-                                                                                         new TypeReference<>() {});
+        postService.deleteAll();
+
+        posts = readValueAction.execute
+                ("jsons\\controller\\post\\posts.json", new TypeReference<>() {});
+
+        expectedPostDtos = readValueAction.execute
+                ("jsons\\controller\\post\\expected_post_dtos.json", new TypeReference<>() {});
+
+        postService.addPosts(posts);
     }
 
     @Test
@@ -80,7 +83,7 @@ public class PostControllerIT {
     }
 
     @Test
-    void getAll() {
+    void getAll(SoftAssertions softAssertions) {
         // Arrange
         when(postService.getAll()).thenReturn(posts);
 
@@ -111,15 +114,14 @@ public class PostControllerIT {
     @Test
     void create() throws IOException {
         // Arrange
-        CreatePostDto createPostDto = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\create_post_dto.json"),
-                                                                                           CreatePostDto.class);
-        PostArgument createPostArgument = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\create_post_argument.json"),
-                                                                                           CreatePostArgument.class);
-        Post createdPost = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\created_post.json"),
-                                                                                                 Post.class);
+        CreatePostDto createPostDto = readValueAction.execute
+                ("jsons\\controller\\post\\create_post_dto.json", CreatePostDto.class);
+
+        PostArgument createPostArgument = readValueAction.execute
+                ("jsons\\controller\\post\\create_post_argument.json", CreatePostArgument.class);
+
+        Post createdPost = readValueAction.execute
+                ("jsons\\controller\\post\\created_post.json", Post.class);
 
         when(postService.create(createPostArgument)).thenReturn(createdPost);
 
@@ -136,9 +138,9 @@ public class PostControllerIT {
                                               .returnResult()
                                               .getResponseBody();
 
-        PostDto expectedPostDto = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\create_expected.json"),
-                                                                                                 PostDto.class);
+        PostDto expectedPostDto = readValueAction.execute
+                ("jsons\\controller\\post\\create_expected.json", PostDto.class);
+
         Assertions.assertEquals(expectedPostDto, response);
     }
 
@@ -147,15 +149,14 @@ public class PostControllerIT {
         // Arrange
         UUID updatedId = posts.get(0).getId();
 
-        UpdatePostDto updatePostDto = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\update_post_dto.json"),
-                                                                                           UpdatePostDto.class);
-        PostArgument updatePostArgument = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\update_post_argument.json"),
-                                                                                           UpdatePostArgument.class);
-        Post updatedPost = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\updated_post.json"),
-                                                                                                 Post.class);
+        UpdatePostDto updatePostDto = readValueAction.execute
+                ("jsons\\controller\\post\\update_post_dto.json", UpdatePostDto.class);
+
+        PostArgument updatePostArgument = readValueAction.execute
+                ("jsons\\controller\\post\\update_post_argument.json", UpdatePostArgument.class);
+
+        Post updatedPost = readValueAction.execute
+                ("jsons\\controller\\post\\updated_post.json", Post.class);
 
         when(postService.update(updatePostArgument, updatedId)).thenReturn(updatedPost);
 
@@ -172,16 +173,17 @@ public class PostControllerIT {
                                               .returnResult()
                                               .getResponseBody();
 
-        PostDto expectedPostDto = objectMapper.readValue
-                (getClass().getClassLoader().getResource("jsons\\controller\\post\\update_expected.json"),
-                                                                                                 PostDto.class);
+        PostDto expectedPostDto = readValueAction.execute
+                ("jsons\\controller\\post\\update_expected.json", PostDto.class);
+
         Assertions.assertEquals(expectedPostDto, response);
     }
 
     @Test
-    void delete() {
+    void delete(SoftAssertions softAssertions) {
         // Arrange
-        UUID deletedPostId = posts.get(0).getId();
+        Post deletedPost = posts.get(0);
+        UUID deletedPostId = deletedPost.getId();
 
         // Act
         webTestClient.delete()
@@ -191,5 +193,10 @@ public class PostControllerIT {
                      // Assert
                      .expectStatus()
                      .isOk();
+
+        List<Post> resultPosts = postService.getAll();
+
+        softAssertions.assertThat(resultPosts.size()).isEqualTo(2);
+        softAssertions.assertThat(resultPosts.contains(deletedPost)).isEqualTo(false);
     }
 }
