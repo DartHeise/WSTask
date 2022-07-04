@@ -1,6 +1,5 @@
 [
   {
-    "id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
     "firstName": "Ivan",
     "lastName": "Ivanov",
     "description": "",
@@ -17,7 +16,6 @@
     }
   },
   {
-    "id": "b7287a0c-8302-4286-a6f1-babea92629bc",
     "firstName": "Denis",
     "lastName": "Losev",
     "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit \namet dictum felis, eu fringilla eros. Sed et gravida neque. Nullam at egestas \nerat. Mauris vitae convallis nulla. Aenean condimentum lectus magna. \nSuspendisse viverra quam non ante pellentesque, a euismod nunc dapibus. Duis \nsed congue erat",

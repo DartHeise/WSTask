@@ -2,31 +2,27 @@ package com.ws.task.controller.employee.dto;
 
 import com.ws.task.model.employee.Contacts;
 import com.ws.task.model.employee.JobType;
-import lombok.Builder;
 import lombok.Data;
-import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
 import java.util.UUID;
 
-@Builder
-@Jacksonized
 @Data
 public class EmployeeDto {
 
-    private final UUID id;
+    private UUID id;
 
-    private final String firstName;
+    private String firstName;
 
-    private final String lastName;
+    private String lastName;
 
-    private final String description;
+    private String description;
 
-    private final List<String> characteristics;
+    private List<String> characteristics;
 
-    private final UUID postId;
+    private UUID postId;
 
-    private final JobType jobType;
+    private JobType jobType;
 
-    private final Contacts contacts;
+    private Contacts contacts;
 }

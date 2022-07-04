@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -27,7 +28,8 @@ public class EmployeeService {
         Stream<Employee> employeeStream = filterBySearchingParameters(searchParams);
 
         return employeeStream.sorted(Comparator.comparing(Employee::getLastName)
-                .thenComparing(Employee::getFirstName)).toList();
+                .thenComparing(Employee::getFirstName))
+                .collect(Collectors.toList());
     }
 
     public Employee get(UUID id) {

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,9 +28,9 @@ public class EmployeeController {
 
     private final EmployeeMapper employeeMapper;
 
-    private final CreateEmployeeArgumentAction createEmployeeArgAction;
+    private final CreateEmployeeArgumentAction createEmployeeArgumentCreator;
 
-    private final UpdateEmployeeArgumentAction updateEmployeeArgAction;
+    private final UpdateEmployeeArgumentAction updateEmployeeArgumentCreator;
 
     @GetMapping("/{id}")
     @ApiOperation("Получить работника по идентификатору")
@@ -44,13 +45,13 @@ public class EmployeeController {
         List<Employee> employees = employeeService.getAllOrdered(searchingParams);
         return employees.stream()
                 .map(x -> employeeMapper.toEmployeeDto(x, x.getPost().getId()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/create")
     @ApiOperation("Добавить работника")
     public EmployeeDto createEmployee(@RequestBody @Valid CreateEmployeeDto createEmployeeDto) {
-        EmployeeArgument employeeArgument = createEmployeeArgAction.execute(createEmployeeDto);
+        EmployeeArgument employeeArgument = createEmployeeArgumentCreator.execute(createEmployeeDto);
         Employee createdEmployee = employeeService.create(employeeArgument);
         return employeeMapper.toEmployeeDto(createdEmployee, createdEmployee.getPost().getId());
     }
@@ -58,7 +59,7 @@ public class EmployeeController {
     @PutMapping("/{id}/update")
     @ApiOperation("Обновить работника")
     public EmployeeDto updateEmployee(@PathVariable UUID id, @RequestBody @Valid UpdateEmployeeDto updateEmployeeDto) {
-        EmployeeArgument employeeArgument = updateEmployeeArgAction.execute(updateEmployeeDto);
+        EmployeeArgument employeeArgument = updateEmployeeArgumentCreator.execute(updateEmployeeDto);
         Employee updatedEmployee = employeeService.update(employeeArgument, id);
         return employeeMapper.toEmployeeDto(updatedEmployee, updatedEmployee.getPost().getId());
     }

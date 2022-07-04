@@ -1,14 +1,13 @@
 package com.ws.task.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.ws.task.controller.post.dto.CreatePostDto;
 import com.ws.task.controller.post.dto.PostDto;
 import com.ws.task.controller.post.dto.UpdatePostDto;
+import com.ws.task.controller.post.mapper.PostMapper;
+import com.ws.task.controller.post.mapper.PostMapperImpl;
 import com.ws.task.model.post.Post;
 import com.ws.task.service.postService.PostService;
 import com.ws.task.service.postService.arguments.CreatePostArgument;
-import com.ws.task.service.postService.arguments.PostArgument;
-import com.ws.task.service.postService.arguments.UpdatePostArgument;
 import com.ws.task.util.ReadValueAction;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
@@ -19,14 +18,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import static org.mockito.Mockito.when;
+import java.util.stream.Collectors;
 
 @AutoConfigureWebTestClient
 @ExtendWith(SoftAssertionsExtension.class)
@@ -36,12 +34,14 @@ public class PostControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @SpyBean
+    @Autowired
     private PostService postService;
 
     private List<Post> posts;
 
     private List<PostDto> expectedPostDtos;
+
+    private final PostMapper postMapper = new PostMapperImpl();
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
@@ -49,22 +49,23 @@ public class PostControllerIT {
     private void setUp() throws IOException {
         postService.deleteAll();
 
-        posts = readValueAction.execute
-                ("jsons\\controller\\post\\posts.json", new TypeReference<>() {});
+        CreatePostArgument[] createPostArguments = readValueAction.execute
+                ("jsons\\controller\\post\\create_post_arguments.json", CreatePostArgument[].class);
 
-        expectedPostDtos = readValueAction.execute
-                ("jsons\\controller\\post\\expected_post_dtos.json", new TypeReference<>() {});
+        Arrays.stream(createPostArguments).forEach(x -> postService.create(x));
 
-        postService.addPosts(posts);
+        posts = postService.getAll();
+
+        expectedPostDtos = posts.stream()
+                                .map(postMapper::toPostDto)
+                                .collect(Collectors.toList());
     }
 
     @Test
     void get() {
         // Arrange
-        UUID backendPostId = posts.get(0).getId();
         Post backendPost = posts.get(0);
-
-        when(postService.get(backendPostId)).thenReturn(backendPost);
+        UUID backendPostId = backendPost.getId();
 
         // Act
         PostDto response = webTestClient.get()
@@ -84,9 +85,6 @@ public class PostControllerIT {
 
     @Test
     void getAll(SoftAssertions softAssertions) {
-        // Arrange
-        when(postService.getAll()).thenReturn(posts);
-
         // Act
         List<PostDto> response = webTestClient.get()
                                               .uri("post/getAll")
@@ -117,14 +115,6 @@ public class PostControllerIT {
         CreatePostDto createPostDto = readValueAction.execute
                 ("jsons\\controller\\post\\create_post_dto.json", CreatePostDto.class);
 
-        PostArgument createPostArgument = readValueAction.execute
-                ("jsons\\controller\\post\\create_post_argument.json", CreatePostArgument.class);
-
-        Post createdPost = readValueAction.execute
-                ("jsons\\controller\\post\\created_post.json", Post.class);
-
-        when(postService.create(createPostArgument)).thenReturn(createdPost);
-
         // Act
         PostDto response = webTestClient.post()
                                               .uri("post/create")
@@ -138,8 +128,9 @@ public class PostControllerIT {
                                               .returnResult()
                                               .getResponseBody();
 
-        PostDto expectedPostDto = readValueAction.execute
-                ("jsons\\controller\\post\\create_expected.json", PostDto.class);
+        UUID createdPostId = response.getId();
+        Post createdPost = postService.get(createdPostId);
+        PostDto expectedPostDto = postMapper.toPostDto(createdPost);
 
         Assertions.assertEquals(expectedPostDto, response);
     }
@@ -148,17 +139,8 @@ public class PostControllerIT {
     void update() throws IOException {
         // Arrange
         UUID updatedId = posts.get(0).getId();
-
         UpdatePostDto updatePostDto = readValueAction.execute
                 ("jsons\\controller\\post\\update_post_dto.json", UpdatePostDto.class);
-
-        PostArgument updatePostArgument = readValueAction.execute
-                ("jsons\\controller\\post\\update_post_argument.json", UpdatePostArgument.class);
-
-        Post updatedPost = readValueAction.execute
-                ("jsons\\controller\\post\\updated_post.json", Post.class);
-
-        when(postService.update(updatePostArgument, updatedId)).thenReturn(updatedPost);
 
         // Act
         PostDto response = webTestClient.put()
@@ -173,8 +155,8 @@ public class PostControllerIT {
                                               .returnResult()
                                               .getResponseBody();
 
-        PostDto expectedPostDto = readValueAction.execute
-                ("jsons\\controller\\post\\update_expected.json", PostDto.class);
+        Post updatedPost = postService.get(updatedId);
+        PostDto expectedPostDto = postMapper.toPostDto(updatedPost);
 
         Assertions.assertEquals(expectedPostDto, response);
     }
