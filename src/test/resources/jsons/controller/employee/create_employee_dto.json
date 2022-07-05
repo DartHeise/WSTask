@@ -1,0 +1,13 @@
+{
+  "firstName": "Artem",
+  "lastName": "Kornev",
+  "description": "",
+  "characteristics": ["shy", "tactful", "resourceful", "reliable"],
+  "postId": "",
+  "jobType": "PERMANENT",
+  "contacts": {
+    "phone": "+16463483212",
+    "email": "Kornevenrok@gmail.com",
+    "workEmail": "KornevWorker123@bk.ru"
+  }
+}

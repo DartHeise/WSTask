@@ -1,0 +1,36 @@
+[
+  {
+    "id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+    "firstName": "Ivan",
+    "lastName": "Ivanov",
+    "description": "",
+    "characteristics": ["active", "cynical", "hard-working", "enthusiastic"],
+    "post": {
+      "id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
+      "name": "Frontend"
+    },
+    "jobType": "TEMPORARY",
+    "contacts": {
+      "phone": "+16463211930",
+      "email": "Ivanov14@mail.ru",
+      "workEmail": "IvanovWorker321@bk.ru"
+    }
+  },
+  {
+    "id": "b7287a0c-8302-4286-a6f1-babea92629bc",
+    "firstName": "Denis",
+    "lastName": "Losev",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit \namet dictum felis, eu fringilla eros. Sed et gravida neque. Nullam at egestas \nerat. Mauris vitae convallis nulla. Aenean condimentum lectus magna. \nSuspendisse viverra quam non ante pellentesque, a euismod nunc dapibus. Duis \nsed congue erat",
+    "characteristics": ["honest", "introvert", "like criticism", "love of learning", "pragmatism"],
+    "post": {
+      "id": "854ef89d-6c27-4635-926d-894d76a81707",
+      "name": "Backend"
+    },
+    "jobType": "PERMANENT",
+    "contacts": {
+      "phone": "+16463484474",
+      "email": "Losev14333@gmail.com",
+      "workEmail": "LosevWorker111@bk.ru"
+    }
+  }
+]
