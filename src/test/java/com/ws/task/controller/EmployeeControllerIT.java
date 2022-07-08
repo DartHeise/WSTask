@@ -1,17 +1,19 @@
 package com.ws.task.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.ws.task.controller.employee.dto.CreateEmployeeDto;
 import com.ws.task.controller.employee.dto.EmployeeDto;
 import com.ws.task.controller.employee.dto.UpdateEmployeeDto;
-import com.ws.task.controller.employee.mapper.EmployeeMapper;
-import com.ws.task.controller.employee.mapper.EmployeeMapperImpl;
 import com.ws.task.model.employee.Employee;
 import com.ws.task.model.post.Post;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
 import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
+import com.ws.task.service.employeeService.arguments.EmployeeArgument;
+import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
 import com.ws.task.service.postService.PostService;
 import com.ws.task.service.postService.arguments.CreatePostArgument;
+import com.ws.task.service.postService.arguments.PostArgument;
 import com.ws.task.util.ReadValueAction;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
@@ -22,13 +24,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
+import static org.mockito.Mockito.when;
 
 @AutoConfigureWebTestClient
 @ExtendWith(SoftAssertionsExtension.class)
@@ -46,26 +50,28 @@ public class EmployeeControllerIT {
 
     private List<Employee> employees;
 
-    private List<EmployeeDto> expectedEmployeeDtos;
+    private List<Post> posts;
 
-    private final EmployeeMapper employeeMapper = new EmployeeMapperImpl();
+    private List<EmployeeDto> expectedEmployeeDtos;
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
     @BeforeEach
     private void setUp() throws IOException {
         employeeService.deleteAll();
+        postService.deleteAll();
 
-        CreateEmployeeArgument[] createEmployeeArguments = readValueAction.execute
-                ("jsons\\controller\\employee\\create_employee_arguments.json", CreateEmployeeArgument[].class);
+        posts = readValueAction.execute
+                ("jsons\\controller\\employee\\posts.json", new TypeReference<>() {});
 
-        Arrays.stream(createEmployeeArguments).forEach(x -> employeeService.create(x));
+        employees = readValueAction.execute
+                ("jsons\\controller\\employee\\employees.json", new TypeReference<>() {});
 
-        employees = employeeService.getAllOrdered(new SearchingParameters());
+        expectedEmployeeDtos = readValueAction.execute
+                ("jsons\\controller\\employee\\expected_employee_dtos.json", new TypeReference<>() {});
 
-        expectedEmployeeDtos = employees.stream()
-                                        .map(x -> employeeMapper.toEmployeeDto(x, x.getPost().getId()))
-                                        .collect(Collectors.toList());
+        postService.addPosts(posts);
+        employeeService.addEmployees(employees);
     }
 
     @Test
@@ -76,17 +82,18 @@ public class EmployeeControllerIT {
 
         // Act
         EmployeeDto response = webTestClient.get()
-                                                  .uri("employee/{id}", employeeId)
-                                                  .exchange()
+                .uri("employee/{id}", employeeId)
+                .exchange()
 
-                                                  // Assert
-                                                  .expectStatus()
-                                                  .isOk()
-                                                  .expectBody(EmployeeDto.class)
-                                                  .returnResult()
-                                                  .getResponseBody();
+                // Assert
+                .expectStatus()
+                .isOk()
+                .expectBody(EmployeeDto.class)
+                .returnResult()
+                .getResponseBody();
 
         EmployeeDto expectedEmployeeDto = expectedEmployeeDtos.get(0);
+
         Assertions.assertEquals(expectedEmployeeDto, response);
     }
 
@@ -94,15 +101,15 @@ public class EmployeeControllerIT {
     void getAll(SoftAssertions softAssertions) {
         // Act
         List<EmployeeDto> response = webTestClient.get()
-                                                  .uri("employee/getAll")
-                                                  .exchange()
+                .uri("employee/getAll")
+                .exchange()
 
-                                                  // Assert
-                                                  .expectStatus()
-                                                  .isOk()
-                                                  .expectBodyList(EmployeeDto.class)
-                                                  .returnResult()
-                                                  .getResponseBody();
+                // Assert
+                .expectStatus()
+                .isOk()
+                .expectBodyList(EmployeeDto.class)
+                .returnResult()
+                .getResponseBody();
 
         softAssertions.assertThat(response.size()).isEqualTo(2);
 
@@ -116,32 +123,26 @@ public class EmployeeControllerIT {
     @Test
     void create() throws IOException {
         // Arrange
+        UUID backendId = posts.get(0).getId();
         CreateEmployeeDto createEmployeeDto = readValueAction.execute
                 ("jsons\\controller\\employee\\create_employee_dto.json", CreateEmployeeDto.class);
 
-        CreatePostArgument createMobilePost = readValueAction.execute
-                ("jsons\\controller\\employee\\create_mobile_post_argument.json", CreatePostArgument.class);
-
-        Post mobilePost = postService.create(createMobilePost);
-        UUID mobileId = mobilePost.getId();
-        createEmployeeDto.setPostId(mobileId);
-
         // Act
         EmployeeDto response = webTestClient.post()
-                                                  .uri("employee/create")
-                                                  .bodyValue(createEmployeeDto)
-                                                  .exchange()
+                .uri("employee/create")
+                .bodyValue(createEmployeeDto)
+                .exchange()
 
-                                                  // Assert
-                                                  .expectStatus()
-                                                  .isOk()
-                                                  .expectBody(EmployeeDto.class)
-                                                  .returnResult()
-                                                  .getResponseBody();
+                // Assert
+                .expectStatus()
+                .isOk()
+                .expectBody(EmployeeDto.class)
+                .returnResult()
+                .getResponseBody();
 
-        UUID createdEmployeeId = response.getId();
-        Employee createdEmployee = employeeService.get(createdEmployeeId);
-        EmployeeDto expectedEmployeeDto = employeeMapper.toEmployeeDto(createdEmployee, mobileId);
+        EmployeeDto expectedEmployeeDto = readValueAction.execute
+                ("jsons\\controller\\employee\\create_expected.json",  EmployeeDto.class);
+        expectedEmployeeDto.setId(response.getId());
 
         Assertions.assertEquals(expectedEmployeeDto, response);
     }
@@ -154,28 +155,21 @@ public class EmployeeControllerIT {
         UpdateEmployeeDto updateEmployeeDto = readValueAction.execute
                 ("jsons\\controller\\employee\\update_employee_dto.json", UpdateEmployeeDto.class);
 
-        CreatePostArgument createMobilePost = readValueAction.execute
-                ("jsons\\controller\\employee\\update_mobile_post_argument.json", CreatePostArgument.class);
-
-        Post mobilePost = postService.create(createMobilePost);
-        UUID mobileId = mobilePost.getId();
-        updateEmployeeDto.setPostId(mobileId);
-
         // Act
         EmployeeDto response = webTestClient.put()
-                                                  .uri("employee/{id}/update", updatedId)
-                                                  .bodyValue(updateEmployeeDto)
-                                                  .exchange()
+                .uri("employee/{id}/update", updatedId)
+                .bodyValue(updateEmployeeDto)
+                .exchange()
 
-                                                  // Assert
-                                                  .expectStatus()
-                                                  .isOk()
-                                                  .expectBody(EmployeeDto.class)
-                                                  .returnResult()
-                                                  .getResponseBody();
+                // Assert
+                .expectStatus()
+                .isOk()
+                .expectBody(EmployeeDto.class)
+                .returnResult()
+                .getResponseBody();
 
-        Employee updatedEmployee = employeeService.get(updatedId);
-        EmployeeDto expectedEmployeeDto = employeeMapper.toEmployeeDto(updatedEmployee, mobileId);
+        EmployeeDto expectedEmployeeDto = readValueAction.execute
+                ("jsons\\controller\\employee\\update_expected.json", EmployeeDto.class);
 
         Assertions.assertEquals(expectedEmployeeDto, response);
     }
@@ -188,11 +182,11 @@ public class EmployeeControllerIT {
 
         // Act
         webTestClient.delete()
-                     .uri("employee/{id}/delete", deletedEmployeeId)
-                     .exchange()
-                     // Assert
-                     .expectStatus()
-                     .isOk();
+                .uri("employee/{id}/delete", deletedEmployeeId)
+                .exchange()
+                // Assert
+                .expectStatus()
+                .isOk();
 
         List<Employee> resultPosts = employeeService.getAllOrdered(new SearchingParameters());
 
