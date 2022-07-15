@@ -3,63 +3,60 @@ package com.ws.task.service.postService;
 import com.ws.task.controller.post.mapper.PostMapper;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.post.Post;
+import com.ws.task.repository.PostRepository;
 import com.ws.task.service.postService.arguments.PostArgument;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
-    private final Map<UUID, Post> posts;
-
     private final PostMapper postMapper;
 
-    public void addPosts(List<Post> postList) {
-        postList.stream().forEach(x -> posts.put(x.getId(), x));
-    }
+    private final PostRepository postRepository;
 
     public Post get(UUID id) {
-        throwNotFoundExceptionIfNotExists(id);
-
-        return posts.get(id);
+        return postRepository.findById(id)
+                             .orElseThrow(() -> new NotFoundException("Post not found"));
     }
 
     public List<Post> getAll() {
-        return new ArrayList<>(posts.values());
+        return postRepository.findAll();
     }
 
     public Post create(PostArgument postArgument) {
-        Post post = postMapper.toPost(postArgument, UUID.randomUUID());
-        posts.put(post.getId(), post);
+        Post createdPost = postMapper.toPost(postArgument);
 
-        return post;
+        return postRepository.save(createdPost);
     }
 
     public Post update(PostArgument postArgument, UUID id) {
-        throwNotFoundExceptionIfNotExists(id);
+        log.debug("Updating post with id: {}", id);
 
-        Post post = postMapper.toPost(postArgument, id);
-        posts.replace(post.getId(), post);
+        Post updatedPost = postRepository.findById(id)
+                                         .orElseThrow(() -> new NotFoundException("Post not found"));
 
-        return post;
+        updateFields(updatedPost, postArgument);
+
+        return postRepository.save(updatedPost);
     }
 
     public void delete(UUID id) {
-        posts.remove(id);
+        postRepository.deleteById(id);
     }
 
-    public void deleteAll() {
-        posts.clear();
-    }
-
-    private void throwNotFoundExceptionIfNotExists(UUID id) {
-        if (!posts.containsKey(id))
-            throw new NotFoundException("Post not found");
+    private void updateFields(Post updatedPost, PostArgument postArgument) {
+        log.info("Updating fields...");
+        if (!Objects.equals(updatedPost.getName(), postArgument.getName())) {
+            log.debug("name: {} -> {}", updatedPost.getName(), postArgument.getName());
+            updatedPost.setName(postArgument.getName());
+        }
     }
 }

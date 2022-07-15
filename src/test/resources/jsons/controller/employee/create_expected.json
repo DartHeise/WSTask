@@ -1,10 +1,15 @@
 {
   "firstName": "Artem",
   "lastName": "Kornev",
-  "description": "",
-  "characteristics": ["shy", "tactful", "resourceful", "reliable"],
+  "description": "consectetur adipiscing elit",
+  "characteristics": [
+    "shy",
+    "tactful",
+    "resourceful",
+    "reliable"
+  ],
+  "postId": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
   "jobType": "PERMANENT",
-  "postId": "e0f075a2-efa1-11ec-8ea0-0242ac120002",
   "contacts": {
     "phone": "+16463483212",
     "email": "Kornevenrok@gmail.com",

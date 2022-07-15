@@ -1,0 +1,39 @@
+{
+  "employees": [
+    {
+      "id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+      "first_name": "Artem",
+      "last_name": "Kornev",
+      "description": "consectetur adipiscing elit",
+      "post_id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
+      "job_type": "PERMANENT",
+      "phone": "+16463483212",
+      "email": "Kornevenrok@gmail.com",
+      "work_email": "KornevWorker123@bk.ru"
+    }
+  ],
+  "posts": [
+    {
+      "id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
+      "name": "Frontend"
+    }
+  ],
+  "employee_characteristics": [
+    {
+      "employee_id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+      "characteristics": "shy"
+    },
+    {
+      "employee_id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+      "characteristics": "tactful"
+    },
+    {
+      "employee_id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+      "characteristics": "resourceful"
+    },
+    {
+      "employee_id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+      "characteristics": "reliable"
+    }
+  ]
+}

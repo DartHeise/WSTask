@@ -1,9 +1,13 @@
 package com.ws.task.model.employee;
 
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import javax.persistence.Embeddable;
 
 @Getter
 @EqualsAndHashCode
+@Embeddable
 public class Contacts {
 
     private String phone;

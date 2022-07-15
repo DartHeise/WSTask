@@ -1,20 +1,18 @@
 package com.ws.task.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.ws.task.controller.employee.mapper.EmployeeMapper;
 import com.ws.task.controller.employee.mapper.EmployeeMapperImpl;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.employee.Employee;
+import com.ws.task.repository.EmployeeRepository;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
 import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
 import com.ws.task.util.ReadValueAction;
-import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,125 +20,146 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SoftAssertionsExtension.class)
 public class EmployeeServiceTest {
 
-    private EmployeeService employeeService;
+    private final EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
 
-    private List<Employee> employees;
-
-    private final EmployeeMapper employeeMapper = new EmployeeMapperImpl();
+    private final EmployeeService employeeService = new EmployeeService(new EmployeeMapperImpl(), employeeRepository);
 
     private final ReadValueAction readValueAction = new ReadValueAction();
-
-    @BeforeEach
-    public void setUp() throws IOException {
-        employees = readValueAction.execute
-                ("jsons\\service\\employee\\employees.json", new TypeReference<>() {});
-
-        employeeService = new EmployeeService(new HashMap<>(), employeeMapper);
-        employeeService.addEmployees(employees);
-    }
 
     @ParameterizedTest
     @MethodSource
     public void getAllOrdered(String path, String name, UUID postId) throws Exception {
         // Arrange
         List<Employee> expected = readValueAction.execute
-                (path, new TypeReference<>() {});
+                                                         (path, new TypeReference<>() {});
+
+        when(employeeRepository.findAll()).thenReturn(expected);
 
         // Act
         List<Employee> actual = employeeService.getAllOrdered
-                (new SearchingParameters(name, postId));
+                                                       (new SearchingParameters(name, postId));
 
         // Assert
         Assertions.assertEquals(expected, actual);
+
+        verify(employeeRepository).findAll();
     }
 
     @Test
     public void getEmployeeById() throws IOException {
         // Arrange
         Employee expected = readValueAction.execute
-                ("jsons\\service\\employee\\employee_for_get_employee_by_id_test.json", Employee.class);
+                                                   ("jsons\\service\\employee\\employee_for_get_employee_by_id_test.json",
+                                                    Employee.class);
 
-        UUID employeeId = employees.get(0).getId();
+        UUID employeeId = expected.getId();
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(expected));
 
         // Act
         Employee actual = employeeService.get(employeeId);
 
         // Assert
         Assertions.assertEquals(expected, actual);
+
+        verify(employeeRepository).findById(employeeId);
     }
 
     @Test
-    public void getNotExistingEmployeeById() throws IOException {
+    public void getNotExistingEmployeeById() {
         // Arrange
-        Employee employee = readValueAction.execute
-                ("jsons\\service\\employee\\employee_for_get_not_existing_employee_by_id_test.json",
-                                                                                          Employee.class);
+        UUID employeeId = UUID.randomUUID();
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
 
         // Act & Assert
         NotFoundException exception = Assertions.assertThrows
-                (NotFoundException.class, () -> employeeService.get(employee.getId()));
+                                                        (NotFoundException.class, () -> employeeService.get(employeeId));
+
         String expectedMessage = "Employee not found";
         Assertions.assertTrue(exception.getMessage().contains(expectedMessage));
+
+        verify(employeeRepository).findById(employeeId);
     }
 
     @Test
-    public void createEmployee(SoftAssertions softAssertions) throws IOException {
+    public void createEmployee() throws IOException {
         // Arrange
         EmployeeArgument employeeArgument = readValueAction.execute
-                ("jsons\\service\\employee\\employee_for_create.json", CreateEmployeeArgument.class);
+                                                                   ("jsons\\service\\employee\\create_employee_argument.json",
+                                                                    CreateEmployeeArgument.class);
+
+        Employee employeeForCreate = readValueAction.execute
+                                                            ("jsons\\service\\employee\\employee_for_create.json",
+                                                             Employee.class);
+
+        Employee createdEmployee = readValueAction.execute
+                                                          ("jsons\\service\\employee\\created_employee.json",
+                                                           Employee.class);
+
+        when(employeeRepository.save(employeeForCreate)).thenReturn(createdEmployee);
 
         // Act
         Employee actual = employeeService.create(employeeArgument);
 
         // Assert
-        Employee expected = employeeMapper.toEmployee(employeeArgument, actual.getId());
-        softAssertions.assertThat(expected).isEqualTo(actual);
+        Assertions.assertEquals(createdEmployee, actual);
 
-        softAssertions.assertThat
-                (employeeService.getAllOrdered(new SearchingParameters()).size()).isEqualTo(3);
+        verify(employeeRepository).save(employeeForCreate);
     }
 
     @Test
-    public void updateEmployee(SoftAssertions softAssertions) throws IOException {
+    public void updateEmployee() throws IOException {
         // Arrange
         EmployeeArgument employeeArgument = readValueAction.execute
-                ("jsons\\service\\employee\\employee_for_update.json", UpdateEmployeeArgument.class);
+                                                                   ("jsons\\service\\employee\\update_employee_argument.json",
+                                                                    UpdateEmployeeArgument.class);
 
-        UUID updatedId = employees.get(0).getId();
+        Employee employeeForUpdate = readValueAction.execute
+                                                            ("jsons\\service\\employee\\employee_for_update.json",
+                                                             Employee.class);
+
+        Employee oldEmployee = readValueAction.execute
+                                                      ("jsons\\service\\employee\\old_employee.json",
+                                                       Employee.class);
+
+        UUID updatedId = employeeForUpdate.getId();
+
+        when(employeeRepository.save(employeeForUpdate)).thenReturn(employeeForUpdate);
+        when(employeeRepository.findById(updatedId)).thenReturn(Optional.of(oldEmployee));
 
         // Act
         Employee actual = employeeService.update(employeeArgument, updatedId);
 
         // Assert
-        Employee expected = employeeMapper.toEmployee(employeeArgument, updatedId);
-        softAssertions.assertThat(expected).isEqualTo(actual);
+        Assertions.assertEquals(employeeForUpdate, actual);
 
-        softAssertions.assertThat
-                (employeeService.getAllOrdered(new SearchingParameters()).size()).isEqualTo(2);
+        verify(employeeRepository).save(employeeForUpdate);
+        verify(employeeRepository).findById(updatedId);
     }
 
     @Test
-    public void deleteEmployee(SoftAssertions softAssertions) {
+    public void deleteEmployee() {
         // Arrange
-        Employee deletedEmployee = employees.get(0);
-        UUID deletedEmployeeId = deletedEmployee.getId();
+        UUID deletedEmployeeId = UUID.randomUUID();
+
+        doNothing().when(employeeRepository).deleteById(deletedEmployeeId);
 
         // Act
         employeeService.delete(deletedEmployeeId);
 
         // Assert
-        List<Employee> resultEmployees = employeeService.getAllOrdered(new SearchingParameters());
-
-        softAssertions.assertThat(resultEmployees.size()).isEqualTo(1);
-        softAssertions.assertThat(resultEmployees.contains(deletedEmployee)).isEqualTo(false);
+        verify(employeeRepository).deleteById(deletedEmployeeId);
     }
 
     private static Stream<Arguments> getAllOrdered() {

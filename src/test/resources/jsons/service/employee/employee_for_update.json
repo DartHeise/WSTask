@@ -1,8 +1,14 @@
 {
+  "id": "b7287a0c-8302-4286-a6f1-babea92629bc",
   "firstName": "Artem",
   "lastName": "Kornev",
   "description": "",
-  "characteristics": ["shy", "tactful", "resourceful", "reliable"],
+  "characteristics": [
+    "shy",
+    "tactful",
+    "resourceful",
+    "reliable"
+  ],
   "post": {
     "id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
     "name": "Mobile"

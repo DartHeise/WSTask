@@ -12,5 +12,5 @@ public interface EmployeeMapper {
 
     EmployeeDto toEmployeeDto(Employee employee, UUID postId);
 
-    Employee toEmployee(EmployeeArgument employeeArgument, UUID id);
+    Employee toEmployee(EmployeeArgument employeeArgument);
 }

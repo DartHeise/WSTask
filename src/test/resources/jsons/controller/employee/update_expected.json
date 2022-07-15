@@ -2,9 +2,14 @@
   "id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
   "firstName": "Artem",
   "lastName": "Kornev",
-  "description": "",
-  "characteristics": ["shy", "tactful", "resourceful", "reliable"],
-  "postId": "e0f075a2-efa1-11ec-8ea0-0242ac120002",
+  "description": "consectetur adipiscing elit",
+  "characteristics": [
+    "shy",
+    "tactful",
+    "resourceful",
+    "reliable"
+  ],
+  "postId": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
   "jobType": "PERMANENT",
   "contacts": {
     "phone": "+16463483212",
