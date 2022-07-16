@@ -169,6 +169,7 @@ public class EmployeeControllerIT {
         webTestClient.delete()
                      .uri("employee/{id}/delete", deletedEmployeeId)
                      .exchange()
+
                      // Assert
                      .expectStatus()
                      .isOk();
