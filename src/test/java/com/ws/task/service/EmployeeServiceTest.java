@@ -1,9 +1,13 @@
 package com.ws.task.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.ws.task.action.CreateJpaQueryAction;
 import com.ws.task.controller.employee.mapper.EmployeeMapperImpl;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.employee.Employee;
+import com.ws.task.model.employee.QEmployee;
 import com.ws.task.repository.EmployeeRepository;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
@@ -32,7 +36,12 @@ public class EmployeeServiceTest {
 
     private final EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
 
-    private final EmployeeService employeeService = new EmployeeService(new EmployeeMapperImpl(), employeeRepository);
+    private final JPAQuery<Employee> jpaQuery = mock(JPAQuery.class);
+
+    private final CreateJpaQueryAction createJpaQueryAction = mock(CreateJpaQueryAction.class);
+
+    private final EmployeeService employeeService = new EmployeeService
+            (new EmployeeMapperImpl(), employeeRepository, createJpaQueryAction);
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
@@ -43,7 +52,10 @@ public class EmployeeServiceTest {
         List<Employee> expected = readValueAction.execute
                                                          (path, new TypeReference<>() {});
 
-        when(employeeRepository.findAll()).thenReturn(expected);
+        when(createJpaQueryAction.execute()).thenReturn(jpaQuery);
+        when(jpaQuery.select(any(QEmployee.class))).thenReturn(jpaQuery);
+        when(jpaQuery.orderBy(any(OrderSpecifier.class), any(OrderSpecifier.class))).thenReturn(jpaQuery);
+        when(jpaQuery.fetch()).thenReturn(expected);
 
         // Act
         List<Employee> actual = employeeService.getAllOrdered
@@ -51,8 +63,6 @@ public class EmployeeServiceTest {
 
         // Assert
         Assertions.assertEquals(expected, actual);
-
-        verify(employeeRepository).findAll();
     }
 
     @Test

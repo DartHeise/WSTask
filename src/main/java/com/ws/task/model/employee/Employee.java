@@ -1,7 +1,6 @@
 package com.ws.task.model.employee;
 
 import com.ws.task.model.post.Post;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

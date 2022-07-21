@@ -40,31 +40,33 @@ public class PostControllerIT {
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
+    private final UUID postId = UUID.fromString("e0f075a2-efa1-11ec-8ea0-0242ac120002");
+
     @BeforeEach
     private void setUp() throws IOException {
         expectedPostDtos = readValueAction.execute
-                                                  ("jsons\\controller\\post\\expected_post_dtos.json",
+                                                  ("jsons\\controller\\post\\expected\\post_dtos.json",
                                                    new TypeReference<>() {});
     }
 
     @Test
     @DataSet(value = "jsons\\controller\\post\\datasets\\get_posts.json", cleanAfter = true, cleanBefore = true)
-    void get() {
-        // Arrange
-        PostDto expectedPostDto = expectedPostDtos.get(0);
-        UUID backendPostId = expectedPostDto.getId();
-
+    void get() throws IOException {
         // Act
         PostDto response = webTestClient.get()
-                                        .uri("post/{id}", backendPostId)
+                                        .uri("post/{id}", postId)
                                         .exchange()
 
                                         // Assert
                                         .expectStatus()
                                         .isOk()
                                         .expectBody(PostDto.class)
-                                              .returnResult()
-                                              .getResponseBody();
+                                        .returnResult()
+                                        .getResponseBody();
+
+        PostDto expectedPostDto = readValueAction.execute
+                                                         ("jsons\\controller\\post\\expected\\get_post_dto.json",
+                                                          PostDto.class);
 
         Assertions.assertEquals(expectedPostDto, response);
     }
@@ -118,7 +120,7 @@ public class PostControllerIT {
                                         .getResponseBody();
 
         PostDto expectedPostDto = readValueAction.execute
-                                                         ("jsons\\controller\\post\\create_expected.json",
+                                                         ("jsons\\controller\\post\\expected\\create_post_dto.json",
                                                           PostDto.class);
         expectedPostDto.setId(response.getId());
 
@@ -130,14 +132,13 @@ public class PostControllerIT {
     @ExpectedDataSet(value = "jsons\\controller\\post\\datasets\\update_expected_posts.json")
     void update() throws IOException {
         // Arrange
-        UUID updatedId = UUID.fromString("e0f075a2-efa1-11ec-8ea0-0242ac120002");
         UpdatePostDto updatePostDto = readValueAction.execute
                                                              ("jsons\\controller\\post\\update_post_dto.json",
                                                               UpdatePostDto.class);
 
         // Act
         PostDto response = webTestClient.put()
-                                        .uri("post/{id}/update", updatedId)
+                                        .uri("post/{id}/update", postId)
                                         .bodyValue(updatePostDto)
                                         .exchange()
 
@@ -149,7 +150,7 @@ public class PostControllerIT {
                                         .getResponseBody();
 
         PostDto expectedPostDto = readValueAction.execute
-                                                         ("jsons\\controller\\post\\update_expected.json",
+                                                         ("jsons\\controller\\post\\expected\\update_post_dto.json",
                                                           PostDto.class);
 
         Assertions.assertEquals(expectedPostDto, response);
@@ -159,13 +160,9 @@ public class PostControllerIT {
     @DataSet(value = "jsons\\controller\\post\\datasets\\delete_posts.json", cleanAfter = true, cleanBefore = true)
     @ExpectedDataSet(value = "jsons\\controller\\post\\datasets\\expected_delete_posts.json")
     void delete() {
-        // Arrange
-        PostDto deletedPost = expectedPostDtos.get(0);
-        UUID deletedPostId = deletedPost.getId();
-
         // Act
         webTestClient.delete()
-                     .uri("post/{id}/delete", deletedPostId)
+                     .uri("post/{id}/delete", postId)
                      .exchange()
 
                      // Assert

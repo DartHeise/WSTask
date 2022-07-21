@@ -44,20 +44,18 @@ public class EmployeeControllerIT {
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
+    private final UUID employeeId = UUID.fromString("8ee05ef8-eed9-11ec-8ea0-0242ac120002");
+
     @BeforeEach
     private void setUp() throws IOException {
         expectedEmployeeDtos = readValueAction.execute
-                                                      ("jsons\\controller\\employee\\expected_employee_dtos.json",
+                                                      ("jsons\\controller\\employee\\expected\\employee_dtos.json",
                                                        new TypeReference<>() {});
     }
 
     @Test
     @DataSet(value = "jsons\\controller\\employee\\datasets\\get_employees.json", cleanAfter = true, cleanBefore = true)
-    void get() {
-        // Arrange
-        EmployeeDto expectedEmployeeDto = expectedEmployeeDtos.get(0);
-        UUID employeeId = expectedEmployeeDto.getId();
-
+    void get() throws IOException {
         // Act
         EmployeeDto response = webTestClient.get()
                                             .uri("employee/{id}", employeeId)
@@ -67,8 +65,12 @@ public class EmployeeControllerIT {
                                             .expectStatus()
                                             .isOk()
                                             .expectBody(EmployeeDto.class)
-                                                  .returnResult()
-                                                  .getResponseBody();
+                                            .returnResult()
+                                            .getResponseBody();
+
+        EmployeeDto expectedEmployeeDto = readValueAction.execute
+                                                                 ("jsons\\controller\\employee\\expected\\get_employee_dto.json",
+                                                                  EmployeeDto.class);
 
         Assertions.assertEquals(expectedEmployeeDto, response);
     }
@@ -78,7 +80,7 @@ public class EmployeeControllerIT {
     void getAll(SoftAssertions softAssertions) {
         // Act
         List<EmployeeDto> response = webTestClient.get()
-                                                  .uri("employee/getAll")
+                                                  .uri("employee/list")
                                                   .exchange()
 
                                                   // Assert
@@ -120,7 +122,7 @@ public class EmployeeControllerIT {
                                             .getResponseBody();
 
         EmployeeDto expectedEmployeeDto = readValueAction.execute
-                                                                 ("jsons\\controller\\employee\\create_expected.json",
+                                                                 ("jsons\\controller\\employee\\expected\\create_employee_dto.json",
                                                                   EmployeeDto.class);
         expectedEmployeeDto.setId(response.getId());
 
@@ -132,14 +134,13 @@ public class EmployeeControllerIT {
     @ExpectedDataSet(value = "jsons\\controller\\employee\\datasets\\update_expected_employees.json")
     void update() throws IOException {
         // Arrange
-        UUID updatedId = UUID.fromString("8ee05ef8-eed9-11ec-8ea0-0242ac120002");
         UpdateEmployeeDto updateEmployeeDto = readValueAction.execute
                                                                      ("jsons\\controller\\employee\\update_employee_dto.json",
                                                                       UpdateEmployeeDto.class);
 
         // Act
         EmployeeDto response = webTestClient.put()
-                                            .uri("employee/{id}/update", updatedId)
+                                            .uri("employee/{id}/update", employeeId)
                                             .bodyValue(updateEmployeeDto)
                                             .exchange()
 
@@ -151,7 +152,7 @@ public class EmployeeControllerIT {
                                             .getResponseBody();
 
         EmployeeDto expectedEmployeeDto = readValueAction.execute
-                                                                 ("jsons\\controller\\employee\\update_expected.json",
+                                                                 ("jsons\\controller\\employee\\expected\\update_employee_dto.json",
                                                                   EmployeeDto.class);
 
         Assertions.assertEquals(expectedEmployeeDto, response);
@@ -161,13 +162,9 @@ public class EmployeeControllerIT {
     @DataSet(value = "jsons\\controller\\employee\\datasets\\delete_employees.json", cleanAfter = true, cleanBefore = true)
     @ExpectedDataSet(value = "jsons\\controller\\employee\\datasets\\delete_expected_employees.json")
     void delete() {
-        // Arrange
-        EmployeeDto deletedEmployee = expectedEmployeeDtos.get(0);
-        UUID deletedEmployeeId = deletedEmployee.getId();
-
         // Act
         webTestClient.delete()
-                     .uri("employee/{id}/delete", deletedEmployeeId)
+                     .uri("employee/{id}/delete", employeeId)
                      .exchange()
 
                      // Assert

@@ -33,7 +33,8 @@ public class PostController {
     public PostDto getPost(@PathVariable UUID id, HttpServletRequest request) {
         log.debug("Request getPost with params:");
         log.debug("id: {}", id);
-        log.debug("request IP: {}", request.getRemoteAddr());
+        log.debug("client IP address: {}", request.getRemoteAddr());
+
         Post post = postService.get(id);
         return postMapper.toPostDto(post);
     }
@@ -42,7 +43,8 @@ public class PostController {
     @ApiOperation("Получить все должности")
     public List<PostDto> getAllPosts(HttpServletRequest request) {
         log.debug("Request getAllPosts with params:");
-        log.debug("request IP: {}", request.getRemoteAddr());
+        log.debug("client IP address: {}", request.getRemoteAddr());
+
         List<Post> posts = postService.getAll();
         return posts.stream()
                     .map(postMapper::toPostDto)
@@ -54,7 +56,8 @@ public class PostController {
     public PostDto createPost(@RequestBody @Valid CreatePostDto createPostDto, HttpServletRequest request) {
         log.debug("Request createPost with params:");
         log.debug("createPostDto: {}", createPostDto);
-        log.debug("request IP: {}", request.getRemoteAddr());
+        log.debug("client IP address: {}", request.getRemoteAddr());
+
         PostArgument postArgument = postMapper.toCreatePostArgument(createPostDto);
         Post createdPost = postService.create(postArgument);
         return postMapper.toPostDto(createdPost);
@@ -66,7 +69,8 @@ public class PostController {
         log.debug("Request updatePost with params:");
         log.debug("id: {}", id);
         log.debug("updatePostDto: {}", updatePostDto);
-        log.debug("request IP: {}", request.getRemoteAddr());
+        log.debug("client IP address: {}", request.getRemoteAddr());
+
         PostArgument postArgument = postMapper.toUpdatePostArgument(updatePostDto);
         Post updatedPost = postService.update(postArgument, id);
         return postMapper.toPostDto(updatedPost);
@@ -77,7 +81,8 @@ public class PostController {
     public void deletePost(@PathVariable UUID id, HttpServletRequest request) {
         log.debug("Request deletePost with params:");
         log.debug("id: {}", id);
-        log.debug("request IP: {}", request.getRemoteAddr());
+        log.debug("client IP address: {}", request.getRemoteAddr());
+
         postService.delete(id);
     }
 }

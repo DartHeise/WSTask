@@ -8,6 +8,7 @@ import com.ws.task.service.postService.arguments.PostArgument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,11 +23,13 @@ public class PostService {
 
     private final PostRepository postRepository;
 
+    @Transactional(readOnly = true)
     public Post get(UUID id) {
         return postRepository.findById(id)
                              .orElseThrow(() -> new NotFoundException("Post not found"));
     }
 
+    @Transactional(readOnly = true)
     public List<Post> getAll() {
         return postRepository.findAll();
     }
@@ -37,6 +40,7 @@ public class PostService {
         return postRepository.save(createdPost);
     }
 
+    @Transactional
     public Post update(PostArgument postArgument, UUID id) {
         log.debug("Updating post with id: {}", id);
 
@@ -48,6 +52,7 @@ public class PostService {
         return postRepository.save(updatedPost);
     }
 
+    @Transactional
     public void delete(UUID id) {
         postRepository.deleteById(id);
     }

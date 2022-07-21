@@ -5,7 +5,7 @@
       "first_name": "Artem",
       "last_name": "Kornev",
       "description": "consectetur adipiscing elit",
-      "post_id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
+      "post_id": "854ef89d-6c27-4635-926d-894d76a81707",
       "job_type": "PERMANENT",
       "phone": "+16463483212",
       "email": "Kornevenrok@gmail.com",
@@ -16,6 +16,10 @@
     {
       "id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
       "name": "Frontend"
+    },
+    {
+      "id": "854ef89d-6c27-4635-926d-894d76a81707",
+      "name": "Backend"
     }
   ],
   "employee_characteristics": [
