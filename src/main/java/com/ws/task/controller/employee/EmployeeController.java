@@ -12,16 +12,13 @@ import com.ws.task.service.employeeService.SearchingParameters;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("employee")
@@ -37,22 +34,14 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     @ApiOperation("Получить работника по идентификатору")
-    public EmployeeDto getEmployee(@PathVariable UUID id, HttpServletRequest request) {
-        log.debug("Request getEmployee with params:");
-        log.debug("id: {}", id);
-        log.debug("client IP address: {}", request.getRemoteAddr());
-
+    public EmployeeDto getEmployee(@PathVariable UUID id) {
         Employee employee = employeeService.get(id);
         return employeeMapper.toEmployeeDto(employee, employee.getPost().getId());
     }
 
     @GetMapping("/list")
     @ApiOperation("Получить всех работников")
-    public List<EmployeeDto> getAllEmployees(SearchingParameters searchingParams, HttpServletRequest request) {
-        log.debug("Request getAllEmployees with params:");
-        log.debug("searchingParams: {}", searchingParams);
-        log.debug("client IP address: {}", request.getRemoteAddr());
-
+    public List<EmployeeDto> getAllEmployees(SearchingParameters searchingParams) {
         List<Employee> employees = employeeService.getAllOrdered(searchingParams);
         return employees.stream()
                         .map(x -> employeeMapper.toEmployeeDto(x, x.getPost().getId()))
@@ -61,11 +50,7 @@ public class EmployeeController {
 
     @PostMapping("/create")
     @ApiOperation("Добавить работника")
-    public EmployeeDto createEmployee(@RequestBody @Valid CreateEmployeeDto createEmployeeDto, HttpServletRequest request) {
-        log.debug("Request createEmployee with params:");
-        log.debug("createEmployeeDto: {}", createEmployeeDto);
-        log.debug("client IP address: {}", request.getRemoteAddr());
-
+    public EmployeeDto createEmployee(@RequestBody @Valid CreateEmployeeDto createEmployeeDto) {
         EmployeeArgument employeeArgument = createEmployeeArgumentCreator.execute(createEmployeeDto);
         Employee createdEmployee = employeeService.create(employeeArgument);
         return employeeMapper.toEmployeeDto(createdEmployee, createdEmployee.getPost().getId());
@@ -73,12 +58,7 @@ public class EmployeeController {
 
     @PutMapping("/{id}/update")
     @ApiOperation("Обновить работника")
-    public EmployeeDto updateEmployee(@PathVariable UUID id, @RequestBody @Valid UpdateEmployeeDto updateEmployeeDto, HttpServletRequest request) {
-        log.debug("Request updateEmployee with params:");
-        log.debug("id: {}", id);
-        log.debug("updateEmployeeDto: {}", updateEmployeeDto);
-        log.debug("client IP address: {}", request.getRemoteAddr());
-
+    public EmployeeDto updateEmployee(@PathVariable UUID id, @RequestBody @Valid UpdateEmployeeDto updateEmployeeDto) {
         EmployeeArgument employeeArgument = updateEmployeeArgumentCreator.execute(updateEmployeeDto);
         Employee updatedEmployee = employeeService.update(employeeArgument, id);
         return employeeMapper.toEmployeeDto(updatedEmployee, updatedEmployee.getPost().getId());
@@ -86,11 +66,7 @@ public class EmployeeController {
 
     @DeleteMapping("/{id}/delete")
     @ApiOperation("Удалить работника")
-    public void deleteEmployee(@PathVariable UUID id, HttpServletRequest request) {
-        log.debug("Request deleteEmployee with params:");
-        log.debug("id: {}", id);
-        log.debug("client IP address: {}", request.getRemoteAddr());
-
+    public void deleteEmployee(@PathVariable UUID id) {
         employeeService.delete(id);
     }
 }

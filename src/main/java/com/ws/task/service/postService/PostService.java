@@ -6,15 +6,12 @@ import com.ws.task.model.post.Post;
 import com.ws.task.repository.PostRepository;
 import com.ws.task.service.postService.arguments.PostArgument;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -42,12 +39,10 @@ public class PostService {
 
     @Transactional
     public Post update(PostArgument postArgument, UUID id) {
-        log.debug("Updating post with id: {}", id);
+        postRepository.findById(id)
+                      .orElseThrow(() -> new NotFoundException("Post not found"));
 
-        Post updatedPost = postRepository.findById(id)
-                                         .orElseThrow(() -> new NotFoundException("Post not found"));
-
-        updateFields(updatedPost, postArgument);
+        Post updatedPost = postMapper.toPost(postArgument, id);
 
         return postRepository.save(updatedPost);
     }
@@ -55,13 +50,5 @@ public class PostService {
     @Transactional
     public void delete(UUID id) {
         postRepository.deleteById(id);
-    }
-
-    private void updateFields(Post updatedPost, PostArgument postArgument) {
-        log.info("Updating fields...");
-        if (!Objects.equals(updatedPost.getName(), postArgument.getName())) {
-            log.debug("name: {} -> {}", updatedPost.getName(), postArgument.getName());
-            updatedPost.setName(postArgument.getName());
-        }
     }
 }

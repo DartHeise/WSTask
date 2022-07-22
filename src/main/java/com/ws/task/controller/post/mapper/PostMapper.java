@@ -9,6 +9,8 @@ import com.ws.task.service.postService.arguments.PostArgument;
 import com.ws.task.service.postService.arguments.UpdatePostArgument;
 import org.mapstruct.Mapper;
 
+import java.util.UUID;
+
 @Mapper
 public interface PostMapper {
 
@@ -19,4 +21,6 @@ public interface PostMapper {
     UpdatePostArgument toUpdatePostArgument(UpdatePostDto updatePostDto);
 
     Post toPost(PostArgument postArgument);
+
+    Post toPost(PostArgument postArgument, UUID id);
 }

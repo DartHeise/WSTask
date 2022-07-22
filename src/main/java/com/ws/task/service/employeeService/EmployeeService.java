@@ -9,16 +9,13 @@ import com.ws.task.model.employee.QEmployee;
 import com.ws.task.repository.EmployeeRepository;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmployeeService {
@@ -57,12 +54,10 @@ public class EmployeeService {
 
     @Transactional
     public Employee update(EmployeeArgument employeeArgument, UUID id) {
-        log.debug("Updating employee with id: {}", id);
+        employeeRepository.findById(id)
+                          .orElseThrow(() -> new NotFoundException("Employee not found"));
 
-        Employee updatedEmployee = employeeRepository.findById(id)
-                                                     .orElseThrow(() -> new NotFoundException("Employee not found"));
-
-        updateFields(updatedEmployee, employeeArgument);
+        Employee updatedEmployee = employeeMapper.toEmployee(employeeArgument, id);
 
         return employeeRepository.save(updatedEmployee);
     }
@@ -70,38 +65,6 @@ public class EmployeeService {
     @Transactional
     public void delete(UUID id) {
         employeeRepository.deleteById(id);
-    }
-
-    private void updateFields(Employee updatedEmployee, EmployeeArgument employeeArgument) {
-        log.info("Updating fields...");
-        if (!Objects.equals(updatedEmployee.getFirstName(), employeeArgument.getFirstName())) {
-            log.debug("firstName: {} -> {}", updatedEmployee.getFirstName(), employeeArgument.getFirstName());
-            updatedEmployee.setFirstName(employeeArgument.getFirstName());
-        }
-        if (!Objects.equals(updatedEmployee.getLastName(), employeeArgument.getLastName())) {
-            log.debug("lastName: {} -> {}", updatedEmployee.getLastName(), employeeArgument.getLastName());
-            updatedEmployee.setLastName(employeeArgument.getLastName());
-        }
-        if (!Objects.equals(updatedEmployee.getDescription(), employeeArgument.getDescription())) {
-            log.debug("description: {} -> {}", updatedEmployee.getDescription(), employeeArgument.getDescription());
-            updatedEmployee.setDescription(employeeArgument.getDescription());
-        }
-        if (!Objects.equals(updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics())) {
-            log.debug("characteristics: {} -> {}", updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics());
-            updatedEmployee.setCharacteristics(employeeArgument.getCharacteristics());
-        }
-        if (!Objects.equals(updatedEmployee.getContacts(), employeeArgument.getContacts())) {
-            log.debug("contacts: {} -> {}", updatedEmployee.getContacts(), employeeArgument.getContacts());
-            updatedEmployee.setContacts(employeeArgument.getContacts());
-        }
-        if (!Objects.equals(updatedEmployee.getJobType(), employeeArgument.getJobType())) {
-            log.debug("jobType: {} -> {}", updatedEmployee.getJobType(), employeeArgument.getJobType());
-            updatedEmployee.setJobType(employeeArgument.getJobType());
-        }
-        if (!Objects.equals(updatedEmployee.getPost(), employeeArgument.getPost())) {
-            log.debug("post: {} -> {}", updatedEmployee.getPost(), employeeArgument.getPost());
-            updatedEmployee.setPost(employeeArgument.getPost());
-        }
     }
 
     private void filterBySearchingParameters(SearchingParameters searchParams, JPAQuery<Employee> query, QEmployee employee) {
