@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.ws.task.action.CreateJpaQueryAction;
-import com.ws.task.controller.employee.mapper.EmployeeMapperImpl;
+import com.ws.task.controller.employee.mapper.EmployeeMapper;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.employee.Employee;
 import com.ws.task.model.employee.QEmployee;
@@ -36,12 +36,14 @@ public class EmployeeServiceTest {
 
     private final EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
 
+    private final EmployeeMapper employeeMapper = mock(EmployeeMapper.class);
+
     private final JPAQuery<Employee> jpaQuery = mock(JPAQuery.class);
 
     private final CreateJpaQueryAction createJpaQueryAction = mock(CreateJpaQueryAction.class);
 
     private final EmployeeService employeeService = new EmployeeService
-            (new EmployeeMapperImpl(), employeeRepository, createJpaQueryAction);
+            (employeeMapper, employeeRepository, createJpaQueryAction);
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
@@ -117,6 +119,7 @@ public class EmployeeServiceTest {
                                                           ("jsons\\service\\employee\\created_employee.json",
                                                            Employee.class);
 
+        when(employeeMapper.toEmployee(employeeArgument)).thenReturn(employeeForCreate);
         when(employeeRepository.save(employeeForCreate)).thenReturn(createdEmployee);
 
         // Act
@@ -145,6 +148,7 @@ public class EmployeeServiceTest {
 
         UUID updatedId = employeeForUpdate.getId();
 
+        when(employeeMapper.toEmployee(employeeArgument, updatedId)).thenReturn(employeeForUpdate);
         when(employeeRepository.save(employeeForUpdate)).thenReturn(employeeForUpdate);
         when(employeeRepository.findById(updatedId)).thenReturn(Optional.of(oldEmployee));
 

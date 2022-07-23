@@ -1,7 +1,7 @@
 package com.ws.task.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.ws.task.controller.post.mapper.PostMapperImpl;
+import com.ws.task.controller.post.mapper.PostMapper;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.post.Post;
 import com.ws.task.repository.PostRepository;
@@ -25,9 +25,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SoftAssertionsExtension.class)
 public class PostServiceTest {
 
+    private final PostMapper postMapper = mock(PostMapper.class);
+
     private final PostRepository postRepository = mock(PostRepository.class);
 
-    private final PostService postService = new PostService(new PostMapperImpl(), postRepository);
+    private final PostService postService = new PostService(postMapper, postRepository);
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
@@ -99,6 +101,7 @@ public class PostServiceTest {
                                                   ("jsons\\service\\post\\created_post.json",
                                                    Post.class);
 
+        when(postMapper.toPost(postArgument)).thenReturn(postForCreate);
         when(postRepository.save(postForCreate)).thenReturn(createdPost);
 
         // Act
@@ -127,6 +130,7 @@ public class PostServiceTest {
 
         UUID updatedId = postForUpdate.getId();
 
+        when(postMapper.toPost(postArgument, updatedId)).thenReturn(postForUpdate);
         when(postRepository.findById(updatedId)).thenReturn(Optional.of(oldPost));
         when(postRepository.save(postForUpdate)).thenReturn(postForUpdate);
 
