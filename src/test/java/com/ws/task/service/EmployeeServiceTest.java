@@ -47,8 +47,8 @@ public class EmployeeServiceTest {
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
-    @ParameterizedTest
     @MethodSource
+    @ParameterizedTest
     public void getAllOrdered(String path, String name, UUID postId) throws Exception {
         // Arrange
         List<Employee> expected = readValueAction.execute

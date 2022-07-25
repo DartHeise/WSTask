@@ -8,14 +8,17 @@ import com.ws.task.controller.employee.dto.CreateEmployeeDto;
 import com.ws.task.controller.employee.dto.EmployeeDto;
 import com.ws.task.controller.employee.dto.UpdateEmployeeDto;
 import com.ws.task.service.employeeService.EmployeeService;
+import com.ws.task.service.employeeService.SearchingParameters;
 import com.ws.task.service.postService.PostService;
 import com.ws.task.util.ReadValueAction;
-import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +27,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @AutoConfigureWebTestClient
 @EnablePostgresIntegrationTest
@@ -75,12 +79,16 @@ public class EmployeeControllerIT {
         Assertions.assertEquals(expectedEmployeeDto, response);
     }
 
-    @Test
+    @MethodSource
+    @ParameterizedTest
     @DataSet(value = "jsons\\controller\\employee\\datasets\\get_all_employees.json", cleanAfter = true, cleanBefore = true)
-    void getAll(SoftAssertions softAssertions) {
+    void getAllOrderedAndFilteredByNameAndPostId(String path, String name, UUID postId) throws IOException {
         // Act
         List<EmployeeDto> response = webTestClient.get()
-                                                  .uri("employee/list")
+                                                  .uri(uriBuilder -> uriBuilder.path("employee/list")
+                                                                               .queryParam("name", name)
+                                                                               .queryParam("postId", postId)
+                                                                               .build())
                                                   .exchange()
 
                                                   // Assert
@@ -90,13 +98,10 @@ public class EmployeeControllerIT {
                                                   .returnResult()
                                                   .getResponseBody();
 
-        softAssertions.assertThat(response.size()).isEqualTo(2);
+        List<EmployeeDto> expected = readValueAction.execute
+                                                            (path, new TypeReference<>() {});
 
-        EmployeeDto firstEmployeeDto = response.get(0);
-        softAssertions.assertThat(expectedEmployeeDtos.get(0)).isEqualTo(firstEmployeeDto);
-
-        EmployeeDto secondEmployeeDto = response.get(1);
-        softAssertions.assertThat(expectedEmployeeDtos.get(1)).isEqualTo(secondEmployeeDto);
+        Assertions.assertEquals(expected, response);
     }
 
     @Test
@@ -170,5 +175,27 @@ public class EmployeeControllerIT {
                      // Assert
                      .expectStatus()
                      .isOk();
+    }
+
+    private static Stream<Arguments> getAllOrderedAndFilteredByNameAndPostId() {
+        return Stream.of(
+                Arguments.of("jsons\\controller\\employee\\expected\\sorted_employees.json",
+                             null, null),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_backend_id.json",
+                             null, UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707")),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_first_name_ivan.json",
+                             "Ivan", null),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_last_name_ivanov.json",
+                             "Ivanov", null),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_first_name_denis_and_backend_id.json",
+                             "Denis", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707")),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_last_name_losev_and_backend_id.json",
+                             "Losev", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"))
+                        );
     }
 }
