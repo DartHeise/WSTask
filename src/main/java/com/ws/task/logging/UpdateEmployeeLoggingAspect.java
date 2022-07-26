@@ -31,7 +31,7 @@ public class UpdateEmployeeLoggingAspect {
 
     @Before("callUpdate() && " +
             "args(employeeArgument, id)")
-    public void logUpdatedFields(JoinPoint joinPoint, EmployeeArgument employeeArgument, UUID id) {
+    public void logUpdatedFields(EmployeeArgument employeeArgument, UUID id) {
         log.info("Updating employee with id: {}", id);
 
         Employee updatedEmployee = employeeService.get(id);
@@ -40,28 +40,48 @@ public class UpdateEmployeeLoggingAspect {
     }
 
     private void updateFields(Employee updatedEmployee, EmployeeArgument employeeArgument) {
-        log.info("Updating fields...");
+        StringBuilder stringBuilder = new StringBuilder("Updating fields...");
 
         if (!Objects.equals(updatedEmployee.getFirstName(), employeeArgument.getFirstName())) {
-            log.info("firstName: {} -> {}", updatedEmployee.getFirstName(), employeeArgument.getFirstName());
+            appendString(stringBuilder,"firstName",
+                         updatedEmployee.getFirstName(), employeeArgument.getFirstName());
         }
         if (!Objects.equals(updatedEmployee.getLastName(), employeeArgument.getLastName())) {
-            log.info("lastName: {} -> {}", updatedEmployee.getLastName(), employeeArgument.getLastName());
+            appendString(stringBuilder,"lastName",
+                         updatedEmployee.getLastName(), employeeArgument.getLastName());
         }
         if (!Objects.equals(updatedEmployee.getDescription(), employeeArgument.getDescription())) {
-            log.info("description: {} -> {}", updatedEmployee.getDescription(), employeeArgument.getDescription());
+            appendString(stringBuilder,"description",
+                         updatedEmployee.getDescription(), employeeArgument.getDescription());
         }
         if (!Objects.equals(updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics())) {
-            log.info("characteristics: {} -> {}", updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics());
+            appendString(stringBuilder,"characteristics",
+                         updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics());
         }
         if (!Objects.equals(updatedEmployee.getContacts(), employeeArgument.getContacts())) {
-            log.info("contacts: {} -> {}", updatedEmployee.getContacts(), employeeArgument.getContacts());
+            appendString(stringBuilder,"contacts",
+                         updatedEmployee.getContacts(), employeeArgument.getContacts());
         }
         if (!Objects.equals(updatedEmployee.getJobType(), employeeArgument.getJobType())) {
-            log.info("jobType: {} -> {}", updatedEmployee.getJobType(), employeeArgument.getJobType());
+            appendString(stringBuilder,"jobType",
+                         updatedEmployee.getJobType(), employeeArgument.getJobType());
         }
         if (!Objects.equals(updatedEmployee.getPost(), employeeArgument.getPost())) {
-            log.info("post: {} -> {}", updatedEmployee.getPost(), employeeArgument.getPost());
+            appendString(stringBuilder,"post",
+                         updatedEmployee.getPost(), employeeArgument.getPost());
         }
+
+        log.info(stringBuilder.toString());
+    }
+
+    private void appendString(StringBuilder stringBuilder, String argumentName,
+                              Object oldArgument, Object newArgument) {
+        stringBuilder.append(" ")
+                     .append(argumentName)
+                     .append(": [")
+                     .append(oldArgument)
+                     .append("] -> [")
+                     .append(newArgument)
+                     .append("]");
     }
 }
