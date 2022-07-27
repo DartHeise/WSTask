@@ -23,7 +23,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SoftAssertionsExtension.class)
-public class PostServiceTest {
+public class PostServiceUT {
 
     private final PostMapper postMapper = mock(PostMapper.class);
 

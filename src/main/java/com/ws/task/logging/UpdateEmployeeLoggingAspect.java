@@ -5,7 +5,6 @@ import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -31,7 +30,7 @@ public class UpdateEmployeeLoggingAspect {
 
     @Before("callUpdate() && " +
             "args(employeeArgument, id)")
-    public void logUpdatedFields(EmployeeArgument employeeArgument, UUID id) {
+    public void loggingUpdatedFields(EmployeeArgument employeeArgument, UUID id) {
         log.info("Updating employee with id: {}", id);
 
         Employee updatedEmployee = employeeService.get(id);

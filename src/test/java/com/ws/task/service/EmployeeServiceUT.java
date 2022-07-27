@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SoftAssertionsExtension.class)
-public class EmployeeServiceTest {
+public class EmployeeServiceUT {
 
     private final EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
 
