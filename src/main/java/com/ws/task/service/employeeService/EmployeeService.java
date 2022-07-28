@@ -1,7 +1,8 @@
 package com.ws.task.service.employeeService;
 
-import com.querydsl.jpa.impl.JPAQuery;
-import com.ws.task.action.CreateJpaQueryAction;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.ws.task.controller.employee.mapper.EmployeeMapper;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.employee.Employee;
@@ -11,6 +12,7 @@ import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -24,23 +26,18 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
 
-    private final CreateJpaQueryAction createJpaQueryAction;
-
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     public List<Employee> getAllOrdered(SearchingParameters searchParams) {
-        JPAQuery<Employee> query = createJpaQueryAction.execute();
-        QEmployee employee = QEmployee.employee;
+        Predicate nameAndPostIdPredicate = filterBySearchingParameters(searchParams);
 
-        query.select(employee).from(employee);
+        OrderSpecifier<String> lastNameOrderSpecifier = QEmployee.employee.lastName.asc();
+        OrderSpecifier<String> firstNameOrderSpecifier = QEmployee.employee.firstName.asc();
 
-        filterBySearchingParameters(searchParams, query, employee);
-
-        return query.orderBy(employee.lastName.asc(),
-                             employee.firstName.asc())
-                    .fetch();
+        return (List<Employee>) employeeRepository.findAll(nameAndPostIdPredicate,
+                                                           lastNameOrderSpecifier, firstNameOrderSpecifier);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public Employee get(UUID id) {
         return employeeRepository.findById(id)
                                  .orElseThrow(() -> new NotFoundException("Employee not found"));
@@ -52,7 +49,7 @@ public class EmployeeService {
         return employeeRepository.save(createdEmployee);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Employee update(EmployeeArgument employeeArgument, UUID id) {
         employeeRepository.findById(id)
                           .orElseThrow(() -> new NotFoundException("Employee not found"));
@@ -62,22 +59,22 @@ public class EmployeeService {
         return employeeRepository.save(updatedEmployee);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(UUID id) {
         employeeRepository.deleteById(id);
     }
 
-    private void filterBySearchingParameters(SearchingParameters searchParams, JPAQuery<Employee> query, QEmployee employee) {
+    private Predicate filterBySearchingParameters(SearchingParameters searchParams) {
+        BooleanBuilder searchParamsBooleanBuilder = new BooleanBuilder();
+
         if (!StringUtils.isBlank(searchParams.getName())) {
-            query.where(
-                    employee.firstName.containsIgnoreCase(searchParams.getName()).or(
-                            employee.lastName.containsIgnoreCase(searchParams.getName()))
-                       );
+            searchParamsBooleanBuilder.and(QEmployee.employee.firstName.containsIgnoreCase(searchParams.getName()).or(
+                    QEmployee.employee.lastName.containsIgnoreCase(searchParams.getName())));
         }
         if (searchParams.getPostId() != null) {
-            query.where(
-                    employee.post.id.eq(searchParams.getPostId())
-                       );
+            searchParamsBooleanBuilder.and(QEmployee.employee.post.id.eq(searchParams.getPostId()));
         }
+
+        return searchParamsBooleanBuilder;
     }
 }

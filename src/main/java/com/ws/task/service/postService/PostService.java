@@ -7,6 +7,7 @@ import com.ws.task.repository.PostRepository;
 import com.ws.task.service.postService.arguments.PostArgument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -20,13 +21,13 @@ public class PostService {
 
     private final PostRepository postRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public Post get(UUID id) {
         return postRepository.findById(id)
                              .orElseThrow(() -> new NotFoundException("Post not found"));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     public List<Post> getAll() {
         return postRepository.findAll();
     }
@@ -37,7 +38,7 @@ public class PostService {
         return postRepository.save(createdPost);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Post update(PostArgument postArgument, UUID id) {
         postRepository.findById(id)
                       .orElseThrow(() -> new NotFoundException("Post not found"));
@@ -47,7 +48,7 @@ public class PostService {
         return postRepository.save(updatedPost);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(UUID id) {
         postRepository.deleteById(id);
     }

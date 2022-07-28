@@ -1,13 +1,10 @@
 package com.ws.task.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.ws.task.action.CreateJpaQueryAction;
+import com.querydsl.core.types.Predicate;
 import com.ws.task.controller.employee.mapper.EmployeeMapper;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.employee.Employee;
-import com.ws.task.model.employee.QEmployee;
 import com.ws.task.repository.EmployeeRepository;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.employeeService.SearchingParameters;
@@ -32,18 +29,14 @@ import java.util.stream.Stream;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SoftAssertionsExtension.class)
-public class EmployeeServiceUT {
+public class EmployeeServiceTest {
 
     private final EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
 
     private final EmployeeMapper employeeMapper = mock(EmployeeMapper.class);
 
-    private final JPAQuery<Employee> jpaQuery = mock(JPAQuery.class);
-
-    private final CreateJpaQueryAction createJpaQueryAction = mock(CreateJpaQueryAction.class);
-
     private final EmployeeService employeeService = new EmployeeService
-            (employeeMapper, employeeRepository, createJpaQueryAction);
+            (employeeMapper, employeeRepository);
 
     private final ReadValueAction readValueAction = new ReadValueAction();
 
@@ -54,10 +47,7 @@ public class EmployeeServiceUT {
         List<Employee> expected = readValueAction.execute
                                                          (path, new TypeReference<>() {});
 
-        when(createJpaQueryAction.execute()).thenReturn(jpaQuery);
-        when(jpaQuery.select(any(QEmployee.class))).thenReturn(jpaQuery);
-        when(jpaQuery.orderBy(any(OrderSpecifier.class), any(OrderSpecifier.class))).thenReturn(jpaQuery);
-        when(jpaQuery.fetch()).thenReturn(expected);
+        when(employeeRepository.findAll((Predicate) any(), any(), any())).thenReturn(expected);
 
         // Act
         List<Employee> actual = employeeService.getAllOrdered

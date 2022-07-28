@@ -11,7 +11,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ApiRequestLoggingAspectUT {
+public class ApiRequestLoggingAspectTest {
 
     private final MockHttpServletRequest request = new MockHttpServletRequest();
 

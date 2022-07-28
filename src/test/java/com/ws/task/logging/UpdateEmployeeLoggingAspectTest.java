@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-public class UpdateEmployeeLoggingAspectUT {
+public class UpdateEmployeeLoggingAspectTest {
 
     private final Employee updatedEmployee = mock(Employee.class);
 
