@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,14 +32,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SoftAssertionsExtension.class)
 public class EmployeeServiceTest {
 
-    private final EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
+    private final Sort sort = mock(Sort.class);
 
     private final EmployeeMapper employeeMapper = mock(EmployeeMapper.class);
 
-    private final EmployeeService employeeService = new EmployeeService
-            (employeeMapper, employeeRepository);
+    private final EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
 
     private final ReadValueAction readValueAction = new ReadValueAction();
+
+    private final EmployeeService employeeService = new EmployeeService(employeeMapper, employeeRepository);
+
 
     @MethodSource
     @ParameterizedTest
@@ -47,11 +50,11 @@ public class EmployeeServiceTest {
         List<Employee> expected = readValueAction.execute
                                                          (path, new TypeReference<>() {});
 
-        when(employeeRepository.findAll((Predicate) any(), any(), any())).thenReturn(expected);
+        when(employeeRepository.findAll((Predicate) any(), (Sort) any())).thenReturn(expected);
 
         // Act
         List<Employee> actual = employeeService.getAllOrdered
-                                                       (new SearchingParameters(name, postId));
+                                                       (new SearchingParameters(name, postId), sort);
 
         // Assert
         Assertions.assertEquals(expected, actual);

@@ -1,7 +1,6 @@
 package com.ws.task.service.employeeService;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.ws.task.controller.employee.mapper.EmployeeMapper;
 import com.ws.task.exception.NotFoundException;
@@ -11,6 +10,7 @@ import com.ws.task.repository.EmployeeRepository;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,15 +26,13 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
 
-    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-    public List<Employee> getAllOrdered(SearchingParameters searchParams) {
+    private final QEmployee qEmployee = QEmployee.employee;
+
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public List<Employee> getAllOrdered(SearchingParameters searchParams, Sort sort) {
         Predicate nameAndPostIdPredicate = filterBySearchingParameters(searchParams);
 
-        OrderSpecifier<String> lastNameOrderSpecifier = QEmployee.employee.lastName.asc();
-        OrderSpecifier<String> firstNameOrderSpecifier = QEmployee.employee.firstName.asc();
-
-        return (List<Employee>) employeeRepository.findAll(nameAndPostIdPredicate,
-                                                           lastNameOrderSpecifier, firstNameOrderSpecifier);
+        return (List<Employee>) employeeRepository.findAll(nameAndPostIdPredicate, sort);
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -59,7 +57,7 @@ public class EmployeeService {
         return employeeRepository.save(updatedEmployee);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void delete(UUID id) {
         employeeRepository.deleteById(id);
     }
@@ -68,11 +66,11 @@ public class EmployeeService {
         BooleanBuilder searchParamsBooleanBuilder = new BooleanBuilder();
 
         if (!StringUtils.isBlank(searchParams.getName())) {
-            searchParamsBooleanBuilder.and(QEmployee.employee.firstName.containsIgnoreCase(searchParams.getName()).or(
-                    QEmployee.employee.lastName.containsIgnoreCase(searchParams.getName())));
+            searchParamsBooleanBuilder.and(qEmployee.firstName.containsIgnoreCase(searchParams.getName()).or(
+                    qEmployee.lastName.containsIgnoreCase(searchParams.getName())));
         }
         if (searchParams.getPostId() != null) {
-            searchParamsBooleanBuilder.and(QEmployee.employee.post.id.eq(searchParams.getPostId()));
+            searchParamsBooleanBuilder.and(qEmployee.post.id.eq(searchParams.getPostId()));
         }
 
         return searchParamsBooleanBuilder;

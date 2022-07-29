@@ -1,17 +1,6 @@
 {
   "employees": [
     {
-      "id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
-      "first_name": "Ivan",
-      "last_name": "Ivanov",
-      "description": "Lorem ipsum dolor sit amet",
-      "post_id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
-      "job_type": "TEMPORARY",
-      "phone": "+16463211930",
-      "email": "Ivanov14@mail.ru",
-      "work_email": "IvanovWorker321@bk.ru"
-    },
-    {
       "id": "b7287a0c-8302-4286-a6f1-babea92629bc",
       "first_name": "Denis",
       "last_name": "Losev",
@@ -21,6 +10,17 @@
       "phone": "+16463484474",
       "email": "Losev14333@gmail.com",
       "work_email": "LosevWorker111@bk.ru"
+    },
+    {
+      "id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+      "first_name": "Ivan",
+      "last_name": "Ivanov",
+      "description": "Lorem ipsum dolor sit amet",
+      "post_id": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
+      "job_type": "TEMPORARY",
+      "phone": "+16463211930",
+      "email": "Ivanov14@mail.ru",
+      "work_email": "IvanovWorker321@bk.ru"
     }
   ],
   "posts": [

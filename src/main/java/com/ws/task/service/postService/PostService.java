@@ -27,7 +27,7 @@ public class PostService {
                              .orElseThrow(() -> new NotFoundException("Post not found"));
     }
 
-    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public List<Post> getAll() {
         return postRepository.findAll();
     }
@@ -48,7 +48,7 @@ public class PostService {
         return postRepository.save(updatedPost);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void delete(UUID id) {
         postRepository.deleteById(id);
     }
