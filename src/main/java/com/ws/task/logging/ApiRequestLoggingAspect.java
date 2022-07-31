@@ -32,7 +32,7 @@ public class ApiRequestLoggingAspect {
             logRequest(joinPoint);
             return joinPoint.proceed();
         } catch (Throwable ex) {
-            log.error("Method Signature: {}, Exception: {}", joinPoint.getSignature(), ex.getMessage());
+            logError(joinPoint, ex);
             throw ex;
         }
     }
@@ -55,5 +55,16 @@ public class ApiRequestLoggingAspect {
         HttpServletRequest request = requestAttributes.getRequest();
 
         return request.getRemoteAddr();
+    }
+
+    private void logError(ProceedingJoinPoint joinPoint, Throwable ex) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("Method Signature: ")
+                     .append(joinPoint.getSignature())
+                     .append(", Exception: ")
+                     .append(ex.getMessage());
+
+        log.error(stringBuilder.toString());
     }
 }

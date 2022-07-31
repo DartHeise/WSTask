@@ -2,12 +2,14 @@ package com.ws.task.model.employee;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 import javax.persistence.Embeddable;
 
 @Getter
-@EqualsAndHashCode
+@ToString
 @Embeddable
+@EqualsAndHashCode
 public class Contacts {
 
     private String phone;

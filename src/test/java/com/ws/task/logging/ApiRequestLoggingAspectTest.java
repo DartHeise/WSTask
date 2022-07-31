@@ -4,24 +4,34 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ApiRequestLoggingAspectTest {
+
+    @InjectMocks
+    private final ApiRequestLoggingAspect apiRequestLoggingAspect = new ApiRequestLoggingAspect();
+    @Mock
+    private Logger logger;
 
     private final MockHttpServletRequest request = new MockHttpServletRequest();
 
     private final ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
-
-    private final ApiRequestLoggingAspect apiRequestLoggingAspect = new ApiRequestLoggingAspect();
+    private String clientIP;
 
     @BeforeEach
     void setUp() {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+        clientIP = request.getRemoteAddr();
     }
 
     @Test
@@ -35,6 +45,9 @@ public class ApiRequestLoggingAspectTest {
 
         // Assert
         Assertions.assertEquals(response, result);
+
+        verify(logger).info("client IP address: " + clientIP + "; call null with arguments: null");
+        verifyNoMoreInteractions(logger);
     }
 
     @Test
@@ -46,5 +59,9 @@ public class ApiRequestLoggingAspectTest {
         // Act & Assert
         Assertions.assertThrows
                           (ex.getClass(), () -> apiRequestLoggingAspect.loggingRequest(joinPoint));
+
+        verify(logger).info("client IP address: " + clientIP + "; call null with arguments: null");
+        verify(logger).error("Method Signature: null, Exception: null");
+        verifyNoMoreInteractions(logger);
     }
 }
