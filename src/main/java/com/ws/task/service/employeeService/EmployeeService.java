@@ -1,5 +1,6 @@
 package com.ws.task.service.employeeService;
 
+import com.google.common.collect.Lists;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.ws.task.controller.employee.mapper.EmployeeMapper;
@@ -32,7 +33,7 @@ public class EmployeeService {
     public List<Employee> getAllOrdered(SearchingParameters searchParams, Sort sort) {
         Predicate nameAndPostIdPredicate = filterBySearchingParameters(searchParams);
 
-        return (List<Employee>) employeeRepository.findAll(nameAndPostIdPredicate, sort);
+        return Lists.newArrayList(employeeRepository.findAll(nameAndPostIdPredicate, sort));
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)

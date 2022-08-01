@@ -50,7 +50,7 @@ public class EmployeeServiceTest {
         List<Employee> expected = readValueAction.execute
                                                          (path, new TypeReference<>() {});
 
-        when(employeeRepository.findAll((Predicate) any(), (Sort) any())).thenReturn(expected);
+        when(employeeRepository.findAll((Predicate) any(), eq(sort))).thenReturn(expected);
 
         // Act
         List<Employee> actual = employeeService.getAllOrdered

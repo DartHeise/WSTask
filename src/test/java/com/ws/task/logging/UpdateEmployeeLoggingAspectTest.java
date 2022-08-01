@@ -25,28 +25,32 @@ public class UpdateEmployeeLoggingAspectTest {
 
     private LogAppender updateEmployeeFieldsLogAppender;
 
+    private Employee updatedEmployee;
+
+    private EmployeeArgument employeeArgument;
+
     private final UpdateEmployeeLoggingAspect updateEmployeeLoggingAspect = new UpdateEmployeeLoggingAspect(employeeService);
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         updateEmployeeFieldsLogAppender = new LogAppender();
         updateEmployeeFieldsLogAppender.start();
 
         Logger logger = (Logger) LoggerFactory.getLogger(UpdateEmployeeLoggingAspect.class);
         logger.addAppender(updateEmployeeFieldsLogAppender);
+
+        updatedEmployee = readValueAction.execute
+                                                 ("jsons\\logging\\updateEmployee\\updated_employee.json",
+                                                  Employee.class);
+
+        employeeArgument = readValueAction.execute
+                                                  ("jsons\\logging\\updateEmployee\\update_employee_argument.json",
+                                                   UpdateEmployeeArgument.class);
     }
 
     @Test
-    void loggingUpdatedEmployeeFields() throws IOException {
+    void loggingUpdatedEmployeeFields() {
         // Arrange
-        Employee updatedEmployee = readValueAction.execute
-                                                          ("jsons\\logging\\updateEmployee\\updated_employee.json",
-                                                           Employee.class);
-
-        EmployeeArgument employeeArgument = readValueAction.execute
-                                                                   ("jsons\\logging\\updateEmployee\\update_employee_argument.json",
-                                                                    UpdateEmployeeArgument.class);
-
         UUID updatedEmployeeId = updatedEmployee.getId();
 
         when(employeeService.get(updatedEmployeeId)).thenReturn(updatedEmployee);
@@ -77,15 +81,22 @@ public class UpdateEmployeeLoggingAspectTest {
     }
 
     private String getUpdatedEmployeeFieldsLog() {
-        return "Updating fields... " +
-               "firstName: [Denis] -> [Artem] " +
-               "lastName: [Losev] -> [Kornev] " +
-               "description: [Lorem ipsum dolor sit amet] -> [] " +
-               "characteristics: [[honest, introvert, like criticism, love of learning, pragmatism]] -> " +
-               "[[shy, tactful, resourceful, reliable]] " +
-               "contacts: [Contacts(phone=+16463484474, email=Losev14333@gmail.com, workEmail=LosevWorker111@bk.ru)] -> " +
-               "[Contacts(phone=+16463483212, email=Kornevenrok@gmail.com, workEmail=KornevWorker123@bk.ru)] " +
-               "post: [Post(id=854ef89d-6c27-4635-926d-894d76a81707, name=Backend)] -> " +
-               "[Post(id=762d15a5-3bc9-43ef-ae96-02a680a557d0, name=Mobile)]";
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Updating fields... ")
+          .append(String.format("firstName: [%s] -> [%s] ",
+                                updatedEmployee.getFirstName(), employeeArgument.getFirstName()))
+          .append(String.format("lastName: [%s] -> [%s] ",
+                                updatedEmployee.getLastName(), employeeArgument.getLastName()))
+          .append(String.format("description: [%s] -> [%s] ",
+                                updatedEmployee.getDescription(), employeeArgument.getDescription()))
+          .append(String.format("characteristics: [%s] -> [%s] ",
+                                updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics()))
+          .append(String.format("contacts: [%s] -> [%s] ",
+                                updatedEmployee.getContacts(), employeeArgument.getContacts()))
+          .append(String.format("post: [%s] -> [%s]",
+                                updatedEmployee.getPost(), employeeArgument.getPost()));
+
+        return sb.toString();
     }
 }

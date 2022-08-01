@@ -10,6 +10,7 @@ import com.ws.task.controller.employee.dto.EmployeeDto;
 import com.ws.task.controller.employee.dto.UpdateEmployeeDto;
 import com.ws.task.logging.ApiRequestLoggingAspect;
 import com.ws.task.logging.UpdateEmployeeLoggingAspect;
+import com.ws.task.model.employee.Employee;
 import com.ws.task.service.employeeService.EmployeeService;
 import com.ws.task.service.postService.PostService;
 import com.ws.task.util.LogAppender;
@@ -184,11 +185,20 @@ public class EmployeeControllerIT {
                                                                  ("jsons\\controller\\employee\\expected\\update_employee_dto.json",
                                                                   EmployeeDto.class);
 
+        Employee oldEmployee = readValueAction.execute
+                                                      ("jsons\\controller\\employee\\old_employee.json",
+                                                       Employee.class);
+
+        Employee updatedEmployee = readValueAction.execute
+                                                      ("jsons\\controller\\employee\\updated_employee.json",
+                                                       Employee.class);
+
         Assertions.assertEquals(expectedEmployeeDto, response);
 
         assertApiRequestLog("EmployeeDto com.ws.task.controller.employee.EmployeeController.updateEmployee(UUID,UpdateEmployeeDto)",
                             String.format("[%s, %s]", employeeId, updateEmployeeDto));
-        assertUpdateEmployeeLog();
+
+        assertUpdateEmployeeLog(oldEmployee, updatedEmployee);
     }
 
     @Test
@@ -219,12 +229,13 @@ public class EmployeeControllerIT {
         apiRequestLogAppender.stop();
     }
 
-    private void assertUpdateEmployeeLog() {
+    private void assertUpdateEmployeeLog(Employee oldEmployee, Employee updatedEmployee) {
         String updatedEmployeeIdLog = String.format("Updating employee with id: %s", employeeId);
+        String updatedEmployeeFieldsLog = getUpdatedEmployeeFieldsLog(oldEmployee, updatedEmployee);
 
         assertThat(updateEmployeeLogAppender.getLogEvents()).isNotEmpty()
                                                             .anySatisfy(event -> assertThat(event.getMessage())
-                                                                    .isEqualTo(getUpdatedEmployeeFieldsLog()))
+                                                                    .isEqualTo(updatedEmployeeFieldsLog))
                                                             .anySatisfy(event -> assertThat(event.getMessage())
                                                                     .isEqualTo(updatedEmployeeIdLog));
 
@@ -253,17 +264,25 @@ public class EmployeeControllerIT {
                         );
     }
 
-    private String getUpdatedEmployeeFieldsLog() {
-        return "Updating fields... " +
-               "firstName: [Ivan] -> [Artem] " +
-               "lastName: [Ivanov] -> [Kornev] " +
-               "description: [Lorem ipsum dolor sit amet] -> [consectetur adipiscing elit] " +
-               "characteristics: [[active, cynical, hard-working, enthusiastic]] -> " +
-               "[[shy, tactful, resourceful, reliable]] " +
-               "contacts: [Contacts(phone=+16463211930, email=Ivanov14@mail.ru, workEmail=IvanovWorker321@bk.ru)] -> " +
-               "[Contacts(phone=+16463483212, email=Kornevenrok@gmail.com, workEmail=KornevWorker123@bk.ru)] " +
-               "jobType: [TEMPORARY] -> [PERMANENT] " +
-               "post: [Post(id=762d15a5-3bc9-43ef-ae96-02a680a557d0, name=Frontend)] -> " +
-               "[Post(id=854ef89d-6c27-4635-926d-894d76a81707, name=Backend)]";
+    private String getUpdatedEmployeeFieldsLog(Employee oldEmployee, Employee updatedEmployee) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Updating fields... ")
+          .append(String.format("firstName: [%s] -> [%s] ",
+                                oldEmployee.getFirstName(), updatedEmployee.getFirstName()))
+          .append(String.format("lastName: [%s] -> [%s] ",
+                                oldEmployee.getLastName(), updatedEmployee.getLastName()))
+          .append(String.format("description: [%s] -> [%s] ",
+                                oldEmployee.getDescription(), updatedEmployee.getDescription()))
+          .append(String.format("characteristics: [%s] -> [%s] ",
+                                oldEmployee.getCharacteristics(), updatedEmployee.getCharacteristics()))
+          .append(String.format("contacts: [%s] -> [%s] ",
+                                oldEmployee.getContacts(), updatedEmployee.getContacts()))
+          .append(String.format("jobType: [%s] -> [%s] ",
+                                oldEmployee.getJobType(), updatedEmployee.getJobType()))
+          .append(String.format("post: [%s] -> [%s]",
+                                oldEmployee.getPost(), updatedEmployee.getPost()));
+
+        return sb.toString();
     }
 }
