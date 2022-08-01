@@ -31,7 +31,7 @@ public class UpdateEmployeeLoggingAspect {
     @Before("callUpdate() && " +
             "args(employeeArgument, id)")
     public void loggingUpdatedFields(EmployeeArgument employeeArgument, UUID id) {
-        log.info("Updating employee with id: {}", id);
+        log.info("Updating employee with id: " + id);
 
         Employee updatedEmployee = employeeService.get(id);
 
@@ -39,48 +39,29 @@ public class UpdateEmployeeLoggingAspect {
     }
 
     private void updateFields(Employee updatedEmployee, EmployeeArgument employeeArgument) {
-        StringBuilder stringBuilder = new StringBuilder("Updating fields...");
+        StringBuilder sb = new StringBuilder("Updating fields...");
 
-        if (!Objects.equals(updatedEmployee.getFirstName(), employeeArgument.getFirstName())) {
-            appendString(stringBuilder,"firstName",
-                         updatedEmployee.getFirstName(), employeeArgument.getFirstName());
-        }
-        if (!Objects.equals(updatedEmployee.getLastName(), employeeArgument.getLastName())) {
-            appendString(stringBuilder,"lastName",
-                         updatedEmployee.getLastName(), employeeArgument.getLastName());
-        }
-        if (!Objects.equals(updatedEmployee.getDescription(), employeeArgument.getDescription())) {
-            appendString(stringBuilder,"description",
-                         updatedEmployee.getDescription(), employeeArgument.getDescription());
-        }
-        if (!Objects.equals(updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics())) {
-            appendString(stringBuilder,"characteristics",
-                         updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics());
-        }
-        if (!Objects.equals(updatedEmployee.getContacts(), employeeArgument.getContacts())) {
-            appendString(stringBuilder,"contacts",
-                         updatedEmployee.getContacts(), employeeArgument.getContacts());
-        }
-        if (!Objects.equals(updatedEmployee.getJobType(), employeeArgument.getJobType())) {
-            appendString(stringBuilder,"jobType",
-                         updatedEmployee.getJobType(), employeeArgument.getJobType());
-        }
-        if (!Objects.equals(updatedEmployee.getPost(), employeeArgument.getPost())) {
-            appendString(stringBuilder,"post",
-                         updatedEmployee.getPost(), employeeArgument.getPost());
-        }
+        sb.append(appendUpdatedField("firstName",
+                                     updatedEmployee.getFirstName(), employeeArgument.getFirstName()))
+          .append(appendUpdatedField("lastName",
+                                     updatedEmployee.getLastName(), employeeArgument.getLastName()))
+          .append(appendUpdatedField("description",
+                                     updatedEmployee.getDescription(), employeeArgument.getDescription()))
+          .append(appendUpdatedField("characteristics",
+                                     updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics()))
+          .append(appendUpdatedField("contacts",
+                                     updatedEmployee.getContacts(), employeeArgument.getContacts()))
+          .append(appendUpdatedField("jobType",
+                                     updatedEmployee.getJobType(), employeeArgument.getJobType()))
+          .append(appendUpdatedField("post",
+                                     updatedEmployee.getPost(), employeeArgument.getPost()));
 
-        log.info(stringBuilder.toString());
+        log.info(sb.toString());
     }
 
-    private void appendString(StringBuilder stringBuilder, String argumentName,
-                              Object oldArgument, Object newArgument) {
-        stringBuilder.append(" ")
-                     .append(argumentName)
-                     .append(": [")
-                     .append(oldArgument)
-                     .append("] -> [")
-                     .append(newArgument)
-                     .append("]");
+    private String appendUpdatedField(String argumentName, Object oldArgument, Object newArgument) {
+        return Objects.equals(oldArgument, newArgument)
+               ? ""
+               : String.format(" %s: [%s] -> [%s]", argumentName, oldArgument, newArgument);
     }
 }

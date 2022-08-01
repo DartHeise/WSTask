@@ -1,5 +1,6 @@
 package com.ws.task.controller;
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
@@ -7,7 +8,9 @@ import com.jupiter.tools.spring.test.postgres.annotation.meta.EnablePostgresInte
 import com.ws.task.controller.post.dto.CreatePostDto;
 import com.ws.task.controller.post.dto.PostDto;
 import com.ws.task.controller.post.dto.UpdatePostDto;
+import com.ws.task.logging.ApiRequestLoggingAspect;
 import com.ws.task.service.postService.PostService;
+import com.ws.task.util.LogAppender;
 import com.ws.task.util.ReadValueAction;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +27,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @AutoConfigureWebTestClient
 @EnablePostgresIntegrationTest
@@ -36,6 +43,8 @@ public class PostControllerIT {
     @Autowired
     private PostService postService;
 
+    private LogAppender apiRequestLogAppender;
+
     private List<PostDto> expectedPostDtos;
 
     private final ReadValueAction readValueAction = new ReadValueAction();
@@ -44,6 +53,12 @@ public class PostControllerIT {
 
     @BeforeEach
     private void setUp() throws IOException {
+        apiRequestLogAppender = new LogAppender();
+        apiRequestLogAppender.start();
+
+        Logger logger = (Logger) LoggerFactory.getLogger(ApiRequestLoggingAspect.class);
+        logger.addAppender(apiRequestLogAppender);
+
         expectedPostDtos = readValueAction.execute
                                                   ("jsons\\controller\\post\\expected\\post_dtos.json",
                                                    new TypeReference<>() {});
@@ -69,6 +84,9 @@ public class PostControllerIT {
                                                           PostDto.class);
 
         Assertions.assertEquals(expectedPostDto, response);
+
+        assertApiRequestLog("PostDto com.ws.task.controller.post.PostController.getPost(UUID)",
+                            String.format("[%s]", postId));
     }
 
     @Test
@@ -96,6 +114,9 @@ public class PostControllerIT {
 
         PostDto fullstackResponse = response.get(2);
         softAssertions.assertThat(expectedPostDtos.get(2)).isEqualTo(fullstackResponse);
+
+        assertApiRequestLog("List com.ws.task.controller.post.PostController.getAllPosts()",
+                            "[]");
     }
 
     @Test
@@ -125,6 +146,9 @@ public class PostControllerIT {
         expectedPostDto.setId(response.getId());
 
         Assertions.assertEquals(expectedPostDto, response);
+
+        assertApiRequestLog("PostDto com.ws.task.controller.post.PostController.createPost(CreatePostDto)",
+                            String.format("[%s]", createPostDto));
     }
 
     @Test
@@ -154,6 +178,9 @@ public class PostControllerIT {
                                                           PostDto.class);
 
         Assertions.assertEquals(expectedPostDto, response);
+
+        assertApiRequestLog("PostDto com.ws.task.controller.post.PostController.updatePost(UUID,UpdatePostDto)",
+                            String.format("[%s, %s]", postId, updatePostDto));
     }
 
     @Test
@@ -168,5 +195,19 @@ public class PostControllerIT {
                      // Assert
                      .expectStatus()
                      .isOk();
+
+        assertApiRequestLog("void com.ws.task.controller.post.PostController.deletePost(UUID)",
+                            String.format("[%s]", postId));
+    }
+
+    private void assertApiRequestLog(String arguments, String callMethod) {
+        String requestLogMessage = String.format("client IP address: %s; call %s with arguments: %s",
+                                                 "127.0.0.1", arguments, callMethod);
+
+        assertThat(apiRequestLogAppender.getLogEvents()).isNotEmpty()
+                                                        .anySatisfy(event -> assertThat(event.getMessage())
+                                                                             .isEqualTo(requestLogMessage));
+
+        apiRequestLogAppender.stop();
     }
 }
