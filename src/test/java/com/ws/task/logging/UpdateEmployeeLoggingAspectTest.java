@@ -94,6 +94,8 @@ public class UpdateEmployeeLoggingAspectTest {
                                 updatedEmployee.getCharacteristics(), employeeArgument.getCharacteristics()))
           .append(String.format("contacts: [%s] -> [%s] ",
                                 updatedEmployee.getContacts(), employeeArgument.getContacts()))
+          .append(String.format("jobType: [%s] -> [%s] ",
+                                updatedEmployee.getJobType(), employeeArgument.getJobType()))
           .append(String.format("post: [%s] -> [%s]",
                                 updatedEmployee.getPost(), employeeArgument.getPost()));
 
