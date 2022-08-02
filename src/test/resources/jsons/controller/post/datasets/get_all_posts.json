@@ -1,0 +1,16 @@
+{
+  "posts": [
+    {
+      "id": "e0f075a2-efa1-11ec-8ea0-0242ac120002",
+      "name": "Backend"
+    },
+    {
+      "id": "eb2d6df4-efa1-11ec-8ea0-0242ac120002",
+      "name": "Frontend"
+    },
+    {
+      "id": "f34ff286-efa1-11ec-8ea0-0242ac120002",
+      "name": "Fullstack"
+    }
+  ]
+}

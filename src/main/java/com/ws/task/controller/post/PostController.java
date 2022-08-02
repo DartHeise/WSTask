@@ -37,7 +37,7 @@ public class PostController {
     public List<PostDto> getAllPosts() {
         List<Post> posts = postService.getAll();
         return posts.stream()
-                    .map(postMapper:: toPostDto)
+                    .map(postMapper::toPostDto)
                     .collect(Collectors.toList());
     }
 

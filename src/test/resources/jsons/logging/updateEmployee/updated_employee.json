@@ -1,0 +1,23 @@
+{
+  "id": "8ee05ef8-eed9-11ec-8ea0-0242ac120002",
+  "firstName": "Denis",
+  "lastName": "Losev",
+  "description": "Lorem ipsum dolor sit amet",
+  "characteristics": [
+    "honest",
+    "introvert",
+    "like criticism",
+    "love of learning",
+    "pragmatism"
+  ],
+  "post": {
+    "id": "854ef89d-6c27-4635-926d-894d76a81707",
+    "name": "Backend"
+  },
+  "jobType": "TEMPORARY",
+  "contacts": {
+    "phone": "+16463484474",
+    "email": "Losev14333@gmail.com",
+    "workEmail": "LosevWorker111@bk.ru"
+  }
+}

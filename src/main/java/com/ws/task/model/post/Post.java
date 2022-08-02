@@ -1,16 +1,26 @@
 package com.ws.task.model.post;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.UUID;
 
-@AllArgsConstructor
+@Entity
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
-@Data
+@Table(name = "posts")
 public class Post {
 
+    @Id
+    @GeneratedValue
     private UUID id;
 
     private String name;

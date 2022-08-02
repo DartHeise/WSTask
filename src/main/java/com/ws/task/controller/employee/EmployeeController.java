@@ -12,6 +12,8 @@ import com.ws.task.service.employeeService.SearchingParameters;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -39,13 +41,14 @@ public class EmployeeController {
         return employeeMapper.toEmployeeDto(employee, employee.getPost().getId());
     }
 
-    @GetMapping("/getAll")
+    @GetMapping("/list")
     @ApiOperation("Получить всех работников")
-    public List<EmployeeDto> getAllEmployees(SearchingParameters searchingParams) {
-        List<Employee> employees = employeeService.getAllOrdered(searchingParams);
+    public List<EmployeeDto> getAllEmployees(SearchingParameters searchingParams,
+                                             @SortDefault(sort = {"lastName", "firstName"}, direction = Sort.Direction.ASC) Sort sort) {
+        List<Employee> employees = employeeService.getAllOrdered(searchingParams, sort);
         return employees.stream()
-                .map(x -> employeeMapper.toEmployeeDto(x, x.getPost().getId()))
-                .collect(Collectors.toList());
+                        .map(x -> employeeMapper.toEmployeeDto(x, x.getPost().getId()))
+                        .collect(Collectors.toList());
     }
 
     @PostMapping("/create")

@@ -20,5 +20,7 @@ public interface PostMapper {
 
     UpdatePostArgument toUpdatePostArgument(UpdatePostDto updatePostDto);
 
+    Post toPost(PostArgument postArgument);
+
     Post toPost(PostArgument postArgument, UUID id);
 }

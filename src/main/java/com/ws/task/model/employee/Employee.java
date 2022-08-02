@@ -1,18 +1,24 @@
 package com.ws.task.model.employee;
 
 import com.ws.task.model.post.Post;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Data
+@Table(name = "employees")
 public class Employee {
 
+    @Id
+    @GeneratedValue
     private UUID id;
 
     private String firstName;
@@ -21,15 +27,20 @@ public class Employee {
 
     private String description;
 
-    private List<String> characteristics;
+    @ElementCollection
+    private List<String> characteristics = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "post_id")
     private Post post;
 
+    @Enumerated(EnumType.STRING)
     private JobType jobType;
 
+    @Embedded
     private Contacts contacts;
 
-    public String getName(){
+    public String getName() {
         return lastName + " " + firstName;
     }
 }

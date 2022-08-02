@@ -3,63 +3,53 @@ package com.ws.task.service.postService;
 import com.ws.task.controller.post.mapper.PostMapper;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.post.Post;
+import com.ws.task.repository.PostRepository;
 import com.ws.task.service.postService.arguments.PostArgument;
+import com.ws.task.util.Guard;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
-    private final Map<UUID, Post> posts;
-
     private final PostMapper postMapper;
 
-    public void addPosts(List<Post> postList) {
-        postList.stream().forEach(x -> posts.put(x.getId(), x));
-    }
+    private final PostRepository postRepository;
 
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public Post get(UUID id) {
-        throwNotFoundExceptionIfNotExists(id);
-
-        return posts.get(id);
+        return postRepository.findById(id)
+                             .orElseThrow(() -> new NotFoundException("Post not found"));
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public List<Post> getAll() {
-        return new ArrayList<>(posts.values());
+        return postRepository.findAll();
     }
 
     public Post create(PostArgument postArgument) {
-        Post post = postMapper.toPost(postArgument, UUID.randomUUID());
-        posts.put(post.getId(), post);
+        Post createdPost = postMapper.toPost(postArgument);
 
-        return post;
+        return postRepository.save(createdPost);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Post update(PostArgument postArgument, UUID id) {
-        throwNotFoundExceptionIfNotExists(id);
+        Guard.check(postRepository.existsById(id), "Post not found");
 
-        Post post = postMapper.toPost(postArgument, id);
-        posts.replace(post.getId(), post);
+        Post updatedPost = postMapper.toPost(postArgument, id);
 
-        return post;
+        return postRepository.save(updatedPost);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void delete(UUID id) {
-        posts.remove(id);
-    }
-
-    public void deleteAll() {
-        posts.clear();
-    }
-
-    private void throwNotFoundExceptionIfNotExists(UUID id) {
-        if (!posts.containsKey(id))
-            throw new NotFoundException("Post not found");
+        postRepository.deleteById(id);
     }
 }

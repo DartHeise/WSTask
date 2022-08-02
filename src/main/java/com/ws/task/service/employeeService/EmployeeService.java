@@ -1,84 +1,79 @@
 package com.ws.task.service.employeeService;
 
+import com.google.common.collect.Lists;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import com.ws.task.controller.employee.mapper.EmployeeMapper;
 import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.employee.Employee;
+import com.ws.task.model.employee.QEmployee;
+import com.ws.task.repository.EmployeeRepository;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
+import com.ws.task.util.Guard;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeService {
 
-    private final Map<UUID, Employee> employees;
-
     private final EmployeeMapper employeeMapper;
 
-    public void addEmployees(List<Employee> employeeList) {
-        employeeList.stream().forEach(x -> employees.put(x.getId(), x));
+    private final EmployeeRepository employeeRepository;
+
+    private final QEmployee qEmployee = QEmployee.employee;
+
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public List<Employee> getAllOrdered(SearchingParameters searchParams, Sort sort) {
+        Predicate nameAndPostIdPredicate = filterBySearchingParameters(searchParams);
+
+        return Lists.newArrayList(employeeRepository.findAll(nameAndPostIdPredicate, sort));
     }
 
-    public List<Employee> getAllOrdered(SearchingParameters searchParams) {
-        Stream<Employee> employeeStream = filterBySearchingParameters(searchParams);
-
-        return employeeStream.sorted(Comparator.comparing(Employee::getLastName)
-                .thenComparing(Employee::getFirstName))
-                .collect(Collectors.toList());
-    }
-
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public Employee get(UUID id) {
-        throwNotFoundExceptionIfNotExists(id);
-
-        return employees.get(id);
+        return employeeRepository.findById(id)
+                                 .orElseThrow(() -> new NotFoundException("Employee not found"));
     }
 
     public Employee create(EmployeeArgument employeeArgument) {
-        Employee employee = employeeMapper.toEmployee(employeeArgument, UUID.randomUUID());
-        employees.put(employee.getId(), employee);
+        Employee createdEmployee = employeeMapper.toEmployee(employeeArgument);
 
-        return employee;
+        return employeeRepository.save(createdEmployee);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Employee update(EmployeeArgument employeeArgument, UUID id) {
-        throwNotFoundExceptionIfNotExists(id);
+        Guard.check(employeeRepository.existsById(id), "Employee not found");
 
-        Employee employee = employeeMapper.toEmployee(employeeArgument, id);
-        employees.replace(employee.getId(), employee);
+        Employee updatedEmployee = employeeMapper.toEmployee(employeeArgument, id);
 
-        return employee;
+        return employeeRepository.save(updatedEmployee);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void delete(UUID id) {
-        employees.remove(id);
+        employeeRepository.deleteById(id);
     }
 
-    public void deleteAll() {
-        employees.clear();
-    }
-
-    private void throwNotFoundExceptionIfNotExists(UUID id) {
-        if (!employees.containsKey(id))
-            throw new NotFoundException("Employee not found");
-    }
-
-    private Stream<Employee> filterBySearchingParameters(SearchingParameters searchParams) {
-        List<Employee> employees = new ArrayList<>(this.employees.values());
-        Stream<Employee> employeeStream = employees.stream();
+    private Predicate filterBySearchingParameters(SearchingParameters searchParams) {
+        BooleanBuilder searchParamsBooleanBuilder = new BooleanBuilder();
 
         if (!StringUtils.isBlank(searchParams.getName())) {
-            employeeStream = employeeStream.filter(x -> StringUtils.containsIgnoreCase(x.getLastName(), searchParams.getName())
-                    || StringUtils.containsIgnoreCase(x.getFirstName(), searchParams.getName()));
+            searchParamsBooleanBuilder.and(qEmployee.firstName.containsIgnoreCase(searchParams.getName()).or(
+                    qEmployee.lastName.containsIgnoreCase(searchParams.getName())));
         }
         if (searchParams.getPostId() != null) {
-            employeeStream = employeeStream.filter(x -> x.getPost().getId().equals(searchParams.getPostId()));
+            searchParamsBooleanBuilder.and(qEmployee.post.id.eq(searchParams.getPostId()));
         }
 
-        return employeeStream;
+        return searchParamsBooleanBuilder;
     }
 }
