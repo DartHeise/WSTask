@@ -206,7 +206,7 @@ public class PostControllerIT {
 
         assertThat(apiRequestLogAppender.getLogEvents()).isNotEmpty()
                                                         .anySatisfy(event -> assertThat(event.getMessage())
-                                                                             .isEqualTo(requestLogMessage));
+                                                                .isEqualTo(requestLogMessage));
 
         apiRequestLogAppender.stop();
     }

@@ -32,8 +32,8 @@ public class ApiRequestLoggingAspectTest {
         apiRequestLogAppender = new LogAppender();
         apiRequestLogAppender.start();
 
-        Logger logger = (Logger) LoggerFactory.getLogger(ApiRequestLoggingAspect.class);
-        logger.addAppender(apiRequestLogAppender);
+        Logger apiRequestLogger = (Logger) LoggerFactory.getLogger(ApiRequestLoggingAspect.class);
+        apiRequestLogger.addAppender(apiRequestLogAppender);
 
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         clientIP = request.getRemoteAddr();

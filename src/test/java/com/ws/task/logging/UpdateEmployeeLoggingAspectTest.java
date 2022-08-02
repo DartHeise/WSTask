@@ -61,21 +61,18 @@ public class UpdateEmployeeLoggingAspectTest {
         // Assert
         verify(employeeService).get(updatedEmployeeId);
 
-        assertApiRequestLog(updatedEmployeeId);
+        assertUpdateEmployeeLog(updatedEmployeeId);
     }
 
-    private void assertApiRequestLog(UUID id) {
+    private void assertUpdateEmployeeLog(UUID id) {
         String updatedEmployeeIdLog = String.format("Updating employee with id: %s", id);
+        String updatedEmployeeFieldsLog = getUpdatedEmployeeFieldsLog();
 
-        assertUpdateEmployeeLog(updatedEmployeeIdLog, getUpdatedEmployeeFieldsLog());
-    }
-
-    private void assertUpdateEmployeeLog(String updatedEmployeeIdLog, String updatedEmployeeFieldsLog) {
         assertThat(updateEmployeeFieldsLogAppender.getLogEvents()).isNotEmpty()
                                                                   .anySatisfy(event -> assertThat(event.getMessage())
-                                                                                .isEqualTo(updatedEmployeeFieldsLog))
+                                                                          .isEqualTo(updatedEmployeeFieldsLog))
                                                                   .anySatisfy(event -> assertThat(event.getMessage())
-                                                                                    .isEqualTo(updatedEmployeeIdLog));
+                                                                          .isEqualTo(updatedEmployeeIdLog));
 
         updateEmployeeFieldsLogAppender.stop();
     }

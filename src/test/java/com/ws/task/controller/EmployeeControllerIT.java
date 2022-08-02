@@ -64,8 +64,8 @@ public class EmployeeControllerIT {
         apiRequestLogAppender = new LogAppender();
         apiRequestLogAppender.start();
 
-        Logger logger = (Logger) LoggerFactory.getLogger(ApiRequestLoggingAspect.class);
-        logger.addAppender(apiRequestLogAppender);
+        Logger apiRequestLogger = (Logger) LoggerFactory.getLogger(ApiRequestLoggingAspect.class);
+        apiRequestLogger.addAppender(apiRequestLogAppender);
     }
 
     @Test
@@ -161,8 +161,9 @@ public class EmployeeControllerIT {
         // Arrange
         updateEmployeeLogAppender = new LogAppender();
         updateEmployeeLogAppender.start();
-        Logger logger = (Logger) LoggerFactory.getLogger(UpdateEmployeeLoggingAspect.class);
-        logger.addAppender(updateEmployeeLogAppender);
+
+        Logger updateEmployeeLogger = (Logger) LoggerFactory.getLogger(UpdateEmployeeLoggingAspect.class);
+        updateEmployeeLogger.addAppender(updateEmployeeLogAppender);
 
         UpdateEmployeeDto updateEmployeeDto = readValueAction.execute
                                                                      ("jsons\\controller\\employee\\update_employee_dto.json",
