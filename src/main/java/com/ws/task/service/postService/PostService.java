@@ -5,6 +5,7 @@ import com.ws.task.exception.NotFoundException;
 import com.ws.task.model.post.Post;
 import com.ws.task.repository.PostRepository;
 import com.ws.task.service.postService.arguments.PostArgument;
+import com.ws.task.util.Guard;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -40,8 +41,7 @@ public class PostService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Post update(PostArgument postArgument, UUID id) {
-        postRepository.findById(id)
-                      .orElseThrow(() -> new NotFoundException("Post not found"));
+        Guard.check(postRepository.existsById(id), "Post not found");
 
         Post updatedPost = postMapper.toPost(postArgument, id);
 

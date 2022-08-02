@@ -42,22 +42,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class EmployeeControllerIT {
 
+    private final ReadValueAction readValueAction = new ReadValueAction();
+    private final UUID employeeId = UUID.fromString("8ee05ef8-eed9-11ec-8ea0-0242ac120002");
     @Autowired
     private WebTestClient webTestClient;
-
     @Autowired
     private EmployeeService employeeService;
-
     @Autowired
     private PostService postService;
-
     private LogAppender apiRequestLogAppender;
-
     private LogAppender updateEmployeeLogAppender;
 
-    private final ReadValueAction readValueAction = new ReadValueAction();
+    private static Stream<Arguments> getAllOrderedAndFilteredByNameAndPostId() {
+        return Stream.of(
+                Arguments.of("jsons\\controller\\employee\\expected\\sorted_employees.json",
+                             "", null),
 
-    private final UUID employeeId = UUID.fromString("8ee05ef8-eed9-11ec-8ea0-0242ac120002");
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_backend_id.json",
+                             "", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707")),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_first_name_ivan.json",
+                             "Ivan", null),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_last_name_ivanov.json",
+                             "Ivanov", null),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_first_name_denis_and_backend_id.json",
+                             "Denis", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707")),
+
+                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_last_name_losev_and_backend_id.json",
+                             "Losev", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"))
+                        );
+    }
 
     @BeforeEach
     private void setUp() {
@@ -127,8 +143,8 @@ public class EmployeeControllerIT {
     void create() throws IOException {
         // Arrange
         CreateEmployeeDto createEmployeeDto = readValueAction.execute
-                ("jsons\\controller\\employee\\create_employee_dto.json",
-                 CreateEmployeeDto.class);
+                                                                     ("jsons\\controller\\employee\\create_employee_dto.json",
+                                                                      CreateEmployeeDto.class);
 
         // Act
         EmployeeDto response = webTestClient.post()
@@ -191,8 +207,8 @@ public class EmployeeControllerIT {
                                                        Employee.class);
 
         Employee updatedEmployee = readValueAction.execute
-                                                      ("jsons\\controller\\employee\\updated_employee.json",
-                                                       Employee.class);
+                                                          ("jsons\\controller\\employee\\updated_employee.json",
+                                                           Employee.class);
 
         Assertions.assertEquals(expectedEmployeeDto, response);
 
@@ -241,28 +257,6 @@ public class EmployeeControllerIT {
                                                                     .isEqualTo(updatedEmployeeIdLog));
 
         updateEmployeeLogAppender.stop();
-    }
-
-    private static Stream<Arguments> getAllOrderedAndFilteredByNameAndPostId() {
-        return Stream.of(
-                Arguments.of("jsons\\controller\\employee\\expected\\sorted_employees.json",
-                             "", null),
-
-                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_backend_id.json",
-                             "", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707")),
-
-                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_first_name_ivan.json",
-                             "Ivan", null),
-
-                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_last_name_ivanov.json",
-                             "Ivanov", null),
-
-                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_first_name_denis_and_backend_id.json",
-                             "Denis", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707")),
-
-                Arguments.of("jsons\\controller\\employee\\expected\\employees_with_last_name_losev_and_backend_id.json",
-                             "Losev", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"))
-                        );
     }
 
     private String getUpdatedEmployeeFieldsLog(Employee oldEmployee, Employee updatedEmployee) {

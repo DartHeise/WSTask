@@ -4,7 +4,13 @@
     "firstName": "Denis",
     "lastName": "Losev",
     "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit",
-    "characteristics": ["honest", "introvert", "like criticism", "love of learning", "pragmatism"],
+    "characteristics": [
+      "honest",
+      "introvert",
+      "like criticism",
+      "love of learning",
+      "pragmatism"
+    ],
     "postId": "854ef89d-6c27-4635-926d-894d76a81707",
     "jobType": "PERMANENT",
     "contacts": {

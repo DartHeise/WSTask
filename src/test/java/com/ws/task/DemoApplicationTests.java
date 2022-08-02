@@ -8,8 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @EnablePostgresIntegrationTest
 class DemoApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

@@ -5,6 +5,6 @@ import lombok.extern.jackson.Jacksonized;
 
 @SuperBuilder
 @Jacksonized
-public class UpdatePostArgument extends PostArgument{
+public class UpdatePostArgument extends PostArgument {
 
 }

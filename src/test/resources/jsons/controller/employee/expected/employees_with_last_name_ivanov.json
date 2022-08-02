@@ -4,7 +4,12 @@
     "firstName": "Ivan",
     "lastName": "Ivanov",
     "description": "Lorem ipsum dolor sit amet",
-    "characteristics": ["active", "cynical", "hard-working", "enthusiastic"],
+    "characteristics": [
+      "active",
+      "cynical",
+      "hard-working",
+      "enthusiastic"
+    ],
     "postId": "762d15a5-3bc9-43ef-ae96-02a680a557d0",
     "jobType": "TEMPORARY",
     "contacts": {

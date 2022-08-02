@@ -2,9 +2,13 @@
   "firstName": "Artem",
   "lastName": "Kornev",
   "description": "consectetur adipiscing elit",
-  "characteristics": ["shy", "tactful", "resourceful", "reliable"],
-  "post":
-  {
+  "characteristics": [
+    "shy",
+    "tactful",
+    "resourceful",
+    "reliable"
+  ],
+  "post": {
     "id": "854ef89d-6c27-4635-926d-894d76a81707",
     "name": "Backend"
   },

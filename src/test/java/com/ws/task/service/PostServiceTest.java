@@ -37,7 +37,8 @@ public class PostServiceTest {
     public void getPostById() throws IOException {
         // Arrange
         Post expected = readValueAction.execute
-                                               ("jsons\\service\\post\\post_for_get_post_by_id_test.json", Post.class);
+                                               ("jsons\\service\\post\\post_for_get_post_by_id_test.json",
+                                                Post.class);
 
         UUID backendId = expected.getId();
 
@@ -56,7 +57,8 @@ public class PostServiceTest {
     public void getAllPosts() throws IOException {
         // Arrange
         List<Post> expected = readValueAction.execute
-                                                     ("jsons\\service\\post\\posts_for_get_all_posts_test.json", new TypeReference<>() {});
+                                                     ("jsons\\service\\post\\posts_for_get_all_posts_test.json",
+                                                      new TypeReference<>() {});
 
         when(postRepository.findAll()).thenReturn(expected);
 
@@ -124,14 +126,10 @@ public class PostServiceTest {
                                                     ("jsons\\service\\post\\post_for_update.json",
                                                      Post.class);
 
-        Post oldPost = readValueAction.execute
-                                              ("jsons\\service\\post\\old_post.json",
-                                               Post.class);
-
         UUID updatedId = postForUpdate.getId();
 
         when(postMapper.toPost(postArgument, updatedId)).thenReturn(postForUpdate);
-        when(postRepository.findById(updatedId)).thenReturn(Optional.of(oldPost));
+        when(postRepository.existsById(updatedId)).thenReturn(true);
         when(postRepository.save(postForUpdate)).thenReturn(postForUpdate);
 
         // Act
@@ -140,7 +138,7 @@ public class PostServiceTest {
         // Assert
         Assertions.assertEquals(postForUpdate, actual);
 
-        verify(postRepository).findById(updatedId);
+        verify(postRepository).existsById(updatedId);
         verify(postRepository).save(postForUpdate);
     }
 

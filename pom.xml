@@ -69,6 +69,12 @@
 			<groupId>com.jupiter-tools</groupId>
 			<artifactId>spring-test-postgres</artifactId>
 			<version>0.4</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -159,6 +165,21 @@
 					<compilerArgs>
 						<compilerArg>-Amapstruct.defaultComponentModel=spring</compilerArg>
 					</compilerArgs>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.0</version>
+				<configuration>
+					<includes>
+						<include>**/*Test.java</include>
+					</includes>
+					<excludes>
+						<exclude>**/*IT.java</exclude>
+						<exclude>**/DemoApplicationTests.java</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -37,19 +37,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PostControllerIT {
 
+    private final ReadValueAction readValueAction = new ReadValueAction();
+    private final UUID postId = UUID.fromString("e0f075a2-efa1-11ec-8ea0-0242ac120002");
     @Autowired
     private WebTestClient webTestClient;
-
     @Autowired
     private PostService postService;
-
     private LogAppender apiRequestLogAppender;
-
     private List<PostDto> expectedPostDtos;
-
-    private final ReadValueAction readValueAction = new ReadValueAction();
-
-    private final UUID postId = UUID.fromString("e0f075a2-efa1-11ec-8ea0-0242ac120002");
 
     @BeforeEach
     private void setUp() throws IOException {
@@ -124,8 +119,8 @@ public class PostControllerIT {
     void create() throws IOException {
         // Arrange
         CreatePostDto createPostDto = readValueAction.execute
-                ("jsons\\controller\\post\\create_post_dto.json",
-                 CreatePostDto.class);
+                                                             ("jsons\\controller\\post\\create_post_dto.json",
+                                                              CreatePostDto.class);
 
         // Act
         PostDto response = webTestClient.post()

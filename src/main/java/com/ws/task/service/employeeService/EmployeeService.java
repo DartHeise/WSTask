@@ -9,6 +9,7 @@ import com.ws.task.model.employee.Employee;
 import com.ws.task.model.employee.QEmployee;
 import com.ws.task.repository.EmployeeRepository;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
+import com.ws.task.util.Guard;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
@@ -50,8 +51,7 @@ public class EmployeeService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Employee update(EmployeeArgument employeeArgument, UUID id) {
-        employeeRepository.findById(id)
-                          .orElseThrow(() -> new NotFoundException("Employee not found"));
+        Guard.check(employeeRepository.existsById(id), "Employee not found");
 
         Employee updatedEmployee = employeeMapper.toEmployee(employeeArgument, id);
 

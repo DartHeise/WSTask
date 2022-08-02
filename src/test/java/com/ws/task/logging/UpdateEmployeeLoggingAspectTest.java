@@ -22,14 +22,10 @@ public class UpdateEmployeeLoggingAspectTest {
     private final EmployeeService employeeService = mock(EmployeeService.class);
 
     private final ReadValueAction readValueAction = new ReadValueAction();
-
-    private LogAppender updateEmployeeFieldsLogAppender;
-
-    private Employee updatedEmployee;
-
-    private EmployeeArgument employeeArgument;
-
     private final UpdateEmployeeLoggingAspect updateEmployeeLoggingAspect = new UpdateEmployeeLoggingAspect(employeeService);
+    private LogAppender updateEmployeeFieldsLogAppender;
+    private Employee updatedEmployee;
+    private EmployeeArgument employeeArgument;
 
     @BeforeEach
     void setUp() throws IOException {

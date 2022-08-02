@@ -12,16 +12,20 @@ import com.ws.task.service.employeeService.arguments.CreateEmployeeArgument;
 import com.ws.task.service.employeeService.arguments.EmployeeArgument;
 import com.ws.task.service.employeeService.arguments.UpdateEmployeeArgument;
 import com.ws.task.util.ReadValueAction;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,15 +46,47 @@ public class EmployeeServiceTest {
 
     private final EmployeeService employeeService = new EmployeeService(employeeMapper, employeeRepository);
 
+    private static Stream<Arguments> getAllOrdered() {
+        return Stream.of(
+                Arguments.of("jsons\\service\\employee\\sorted_employees.json",
+                             null, null,
+                             "com.querydsl.core.BooleanBuilder@0"),
+
+                Arguments.of("jsons\\service\\employee\\employees_with_backend_id.json",
+                             null, UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"),
+                             "employee.post.id = 854ef89d-6c27-4635-926d-894d76a81707"),
+
+                Arguments.of("jsons\\service\\employee\\employees_with_first_name_ivan.json",
+                             "Ivan", null,
+                             "containsIc(employee.firstName,Ivan) || containsIc(employee.lastName,Ivan)"),
+
+                Arguments.of("jsons\\service\\employee\\employees_with_last_name_ivanov.json",
+                             "Ivanov", null,
+                             "containsIc(employee.firstName,Ivanov) || " +
+                             "containsIc(employee.lastName,Ivanov)"),
+
+                Arguments.of("jsons\\service\\employee\\employees_with_first_name_denis_and_backend_id.json",
+                             "Denis", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"),
+                             "(containsIc(employee.firstName,Denis) || " +
+                             "containsIc(employee.lastName,Denis)) && " +
+                             "employee.post.id = 854ef89d-6c27-4635-926d-894d76a81707"),
+
+                Arguments.of("jsons\\service\\employee\\employees_with_last_name_losev_and_backend_id.json",
+                             "Losev", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"),
+                             "(containsIc(employee.firstName,Losev) || " +
+                             "containsIc(employee.lastName,Losev)) && " +
+                             "employee.post.id = 854ef89d-6c27-4635-926d-894d76a81707")
+                        );
+    }
 
     @MethodSource
     @ParameterizedTest
-    public void getAllOrdered(String path, String name, UUID postId) throws Exception {
+    public void getAllOrdered(String path, String name, UUID postId, String expectedPredicate) throws Exception {
         // Arrange
         List<Employee> expected = readValueAction.execute
                                                          (path, new TypeReference<>() {});
 
-        when(employeeRepository.findAll((Predicate) any(), eq(sort))).thenReturn(expected);
+        when(employeeRepository.findAll(any(Predicate.class), eq(sort))).thenReturn(expected);
 
         // Act
         List<Employee> actual = employeeService.getAllOrdered
@@ -58,6 +94,12 @@ public class EmployeeServiceTest {
 
         // Assert
         Assertions.assertEquals(expected, actual);
+
+        ArgumentCaptor<Predicate> predicateArgumentCaptor = ArgumentCaptor.forClass(Predicate.class);
+        verify(employeeRepository).findAll(predicateArgumentCaptor.capture(), eq(sort));
+
+        String actualPredicate = predicateArgumentCaptor.getValue().toString();
+        Assertions.assertEquals(actualPredicate, expectedPredicate);
     }
 
     @Test
@@ -122,6 +164,7 @@ public class EmployeeServiceTest {
         Assertions.assertEquals(createdEmployee, actual);
 
         verify(employeeRepository).save(employeeForCreate);
+        verify(employeeMapper).toEmployee(employeeArgument);
     }
 
     @Test
@@ -135,15 +178,11 @@ public class EmployeeServiceTest {
                                                             ("jsons\\service\\employee\\employee_for_update.json",
                                                              Employee.class);
 
-        Employee oldEmployee = readValueAction.execute
-                                                      ("jsons\\service\\employee\\old_employee.json",
-                                                       Employee.class);
-
         UUID updatedId = employeeForUpdate.getId();
 
         when(employeeMapper.toEmployee(employeeArgument, updatedId)).thenReturn(employeeForUpdate);
         when(employeeRepository.save(employeeForUpdate)).thenReturn(employeeForUpdate);
-        when(employeeRepository.findById(updatedId)).thenReturn(Optional.of(oldEmployee));
+        when(employeeRepository.existsById(updatedId)).thenReturn(true);
 
         // Act
         Employee actual = employeeService.update(employeeArgument, updatedId);
@@ -151,8 +190,9 @@ public class EmployeeServiceTest {
         // Assert
         Assertions.assertEquals(employeeForUpdate, actual);
 
+        verify(employeeRepository).existsById(updatedId);
         verify(employeeRepository).save(employeeForUpdate);
-        verify(employeeRepository).findById(updatedId);
+        verify(employeeMapper).toEmployee(employeeArgument, updatedId);
     }
 
     @Test
@@ -167,28 +207,6 @@ public class EmployeeServiceTest {
 
         // Assert
         verify(employeeRepository).deleteById(deletedEmployeeId);
-    }
-
-    private static Stream<Arguments> getAllOrdered() {
-        return Stream.of(
-                Arguments.of("jsons\\service\\employee\\sorted_employees.json",
-                                                                   null, null),
-
-                Arguments.of("jsons\\service\\employee\\employees_with_backend_id.json",
-                         null, UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707")),
-
-                Arguments.of("jsons\\service\\employee\\employees_with_first_name_ivan.json",
-                                                                               "Ivan", null),
-
-                Arguments.of("jsons\\service\\employee\\employees_with_last_name_ivanov.json",
-                                                                              "Ivanov", null),
-
-                Arguments.of("jsons\\service\\employee\\employees_with_first_name_denis_and_backend_id.json",
-                                           "Denis", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707")),
-
-                Arguments.of("jsons\\service\\employee\\employees_with_last_name_losev_and_backend_id.json",
-                                           "Losev", UUID.fromString("854ef89d-6c27-4635-926d-894d76a81707"))
-        );
     }
 }
 
